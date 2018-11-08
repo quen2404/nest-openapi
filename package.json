@@ -50,7 +50,6 @@
     ]
   },
   "dependencies": {
-    "openapi3-ts": "^1.1.0",
     "ts-simple-ast": "^18.0.0"
   }
 }
