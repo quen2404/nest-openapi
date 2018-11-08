@@ -1,0 +1,27 @@
+{
+  "name": "nest-openapi",
+  "version": "1.0.0",
+  "description": "OpenAPI middleware for NestJS",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qdesrame/nest-openapi.git"
+  },
+  "keywords": [
+    "NestJS",
+    "OpenAPI"
+  ],
+  "author": "Quentin Desramé <quen2404@gmail.com>",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/qdesrame/nest-openapi/issues"
+  },
+  "homepage": "https://github.com/qdesrame/nest-openapi#readme"
+}
+
