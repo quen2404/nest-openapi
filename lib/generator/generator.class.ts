@@ -2,7 +2,11 @@ import TypeScriptAst, {
   SourceFile,
   ClassDeclaration,
   MethodDeclaration,
-  SwitchStatement
+  SwitchStatement,
+  CodeBlockWriter,
+  Scope,
+  InterfaceDeclaration,
+  MethodSignature
 } from 'ts-simple-ast';
 import * as camelcase from 'camelcase';
 import {
@@ -42,15 +46,17 @@ export class Generator {
       const name = this.extractNameFromPath(path);
       const nestPath = this.formatPath(path);
       const tsAstHelper = new TypeScriptAst();
+      const serviceFileName = `services/${name}.interface`;
       const serviceFile: SourceFile = tsAstHelper.createSourceFile(
-        `${this.outputPath}/services/${name}.interface.ts`,
+        `${this.outputPath}/${serviceFileName}.ts`,
         '',
         {
           overwrite: true
         }
       );
+      const controllerFileName = `controllers/${name}.controller`;
       const controllerFile: SourceFile = tsAstHelper.createSourceFile(
-        `${this.outputPath}/controllers/${name}.controller.ts`,
+        `${this.outputPath}/${controllerFileName}.ts`,
         '',
         {
           overwrite: true
@@ -60,6 +66,8 @@ export class Generator {
         namedImports: ['Controller'],
         moduleSpecifier: '@nestjs/common'
       });
+      const serviceClassName = `${capitalize(name)}Service`;
+      const serviceName = camelcase(serviceClassName);
       const controllerClass: ClassDeclaration = controllerFile.addClass({
         name: `${capitalize(name)}Controller`,
         isExported: true,
@@ -68,20 +76,56 @@ export class Generator {
             name: 'Controller',
             arguments: [`'${nestPath}'`]
           }
+        ],
+        ctors: [
+          {
+            parameters: [
+              {
+                name: serviceName,
+                type: serviceClassName,
+                isReadonly: true,
+                scope: Scope.Private
+              }
+            ]
+          }
         ]
       });
+      controllerFile.addImportDeclaration({
+        namedImports: [serviceClassName],
+        moduleSpecifier: `../${serviceFileName}`
+      });
       const serviceClass = serviceFile.addInterface({
-        name: `${capitalize(name)}Service`,
+        name: serviceClassName,
         isExported: true
       });
-      this.testOperation('get', pathItem.get, controllerClass);
-      this.testOperation('put', pathItem.put, controllerClass);
-      this.testOperation('post', pathItem.post, controllerClass);
-      this.testOperation('delete', pathItem.delete, controllerClass);
-      this.testOperation('options', pathItem.options, controllerClass);
-      this.testOperation('head', pathItem.head, controllerClass);
-      this.testOperation('patch', pathItem.patch, controllerClass);
-      this.testOperation('trace', pathItem.trace, controllerClass);
+      this.testOperation('get', pathItem.get, controllerClass, serviceClass);
+      this.testOperation('put', pathItem.put, controllerClass, serviceClass);
+      this.testOperation('post', pathItem.post, controllerClass, serviceClass);
+      this.testOperation(
+        'delete',
+        pathItem.delete,
+        controllerClass,
+        serviceClass
+      );
+      this.testOperation(
+        'options',
+        pathItem.options,
+        controllerClass,
+        serviceClass
+      );
+      this.testOperation('head', pathItem.head, controllerClass, serviceClass);
+      this.testOperation(
+        'patch',
+        pathItem.patch,
+        controllerClass,
+        serviceClass
+      );
+      this.testOperation(
+        'trace',
+        pathItem.trace,
+        controllerClass,
+        serviceClass
+      );
       controllerFile.organizeImports().saveSync();
       serviceFile.organizeImports().saveSync();
     });
@@ -90,18 +134,20 @@ export class Generator {
   public testOperation(
     name: string,
     operation: Operation,
-    controllerClass: ClassDeclaration
+    controllerClass: ClassDeclaration,
+    serviceClass: InterfaceDeclaration
   ) {
     if (operation == null) {
       return;
     }
+    const methodName = operation.operationId || 'operation';
     console.log('operation type', name);
     controllerClass.getSourceFile().addImportDeclaration({
       namedImports: [capitalize(name)],
       moduleSpecifier: '@nestjs/common'
     });
-    const method = controllerClass.addMethod({
-      name: operation.operationId || 'operation',
+    const methodController = controllerClass.addMethod({
+      name: methodName,
       decorators: [
         {
           name: capitalize(name),
@@ -113,10 +159,31 @@ export class Generator {
         this.getTypeFromResponses(operation.responses)
       )
     });
-    operation.parameters.forEach((parameter: Parameter) => {
-      this.testParameter(parameter, method);
+    const methodService = serviceClass.addMethod({
+      name: methodName,
+      returnType: this.promisifyType(
+        this.getTypeFromResponses(operation.responses)
+      )
     });
-    this.testRequestBody(operation.requestBody, method);
+    operation.parameters.forEach((parameter: Parameter) => {
+      this.testParameter(parameter, methodController, methodService);
+    });
+    this.testRequestBody(
+      operation.requestBody,
+      methodController,
+      methodService
+    );
+    methodController.setBodyText((write: CodeBlockWriter) => {
+      const parameters = methodController
+        .getParameters()
+        .map(param => param.getName())
+        .join(', ');
+      write.write(
+        `this.${camelcase(
+          serviceClass.getName()
+        )}.${methodName}(${parameters});`
+      );
+    });
   }
 
   public promisifyType(type: string) {
@@ -141,18 +208,22 @@ export class Generator {
     }
   }
 
-  public testParameter(parameter: Parameter, method: MethodDeclaration) {
+  public testParameter(
+    parameter: Parameter,
+    methodController: MethodDeclaration,
+    methodService: MethodSignature
+  ) {
     const camelName = camelcase(parameter.name);
     const decoratorName = this.getParameterDecorator(parameter);
     const decoratorArgs = [];
     if (camelName !== parameter.name) {
       decoratorArgs.push(parameter.name);
     }
-    method.getSourceFile().addImportDeclaration({
+    methodController.getSourceFile().addImportDeclaration({
       namedImports: [decoratorName],
       moduleSpecifier: '@nestjs/common'
     });
-    method.addParameter({
+    methodController.addParameter({
       name: parameter.name,
       decorators: [
         {
@@ -160,6 +231,10 @@ export class Generator {
           arguments: decoratorArgs
         }
       ],
+      type: this.getTypeFromSchema(parameter.schema)
+    });
+    methodService.addParameter({
+      name: parameter.name,
       type: this.getTypeFromSchema(parameter.schema)
     });
   }
@@ -180,7 +255,11 @@ export class Generator {
     return 'any'; //TODO
   }
 
-  public testRequestBody(requestBody: RequestBody, method: MethodDeclaration) {
+  public testRequestBody(
+    requestBody: RequestBody,
+    methodController: MethodDeclaration,
+    methodService: MethodSignature
+  ) {
     if (
       !requestBody ||
       !requestBody.content ||
@@ -190,11 +269,11 @@ export class Generator {
     }
     const content = requestBody.content.get('application/json');
     content.schema;
-    method.getSourceFile().addImportDeclaration({
+    methodController.getSourceFile().addImportDeclaration({
       namedImports: ['Body'],
       moduleSpecifier: '@nestjs/common'
     });
-    method.addParameter({
+    methodController.addParameter({
       name: 'body',
       decorators: [
         {
@@ -202,6 +281,10 @@ export class Generator {
           arguments: []
         }
       ],
+      type: this.getTypeFromSchema(content.schema)
+    });
+    methodService.addParameter({
+      name: 'body',
       type: this.getTypeFromSchema(content.schema)
     });
   }
