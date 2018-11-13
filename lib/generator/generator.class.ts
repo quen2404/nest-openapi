@@ -82,8 +82,8 @@ export class Generator {
       this.testOperation('head', pathItem.head, controllerClass);
       this.testOperation('patch', pathItem.patch, controllerClass);
       this.testOperation('trace', pathItem.trace, controllerClass);
-      controllerFile.saveSync();
-      serviceFile.saveSync();
+      controllerFile.organizeImports().saveSync();
+      serviceFile.organizeImports().saveSync();
     });
   }
 
