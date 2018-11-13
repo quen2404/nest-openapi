@@ -1,9 +1,9 @@
 import { MediaType } from './media-type.model';
+import { Type } from 'class-transformer';
 
-export interface RequestBody {
+export class RequestBody {
   description: string;
-  content: {
-    [name: string]: MediaType;
-  };
+  @Type(() => MediaType)
+  content: Map<string, MediaType>;
   required: boolean;
 }

@@ -1,4 +1,4 @@
-export interface Example {
+export class Example {
   summary: string;
   description: string;
   value: any;

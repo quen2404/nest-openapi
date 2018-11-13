@@ -1,3 +1,3 @@
 import { Parameter } from './parameter.model';
 
-export interface Header extends Parameter {}
+export class Header extends Parameter {}

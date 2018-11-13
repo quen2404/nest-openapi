@@ -1,10 +1,10 @@
 import { Header } from './header.model';
 import { Style } from './parameter.model';
-export interface Encoding {
+import { Type } from 'class-transformer';
+export class Encoding {
   contentType: string;
-  headers: {
-    [name: string]: Header;
-  };
+  @Type(() => Header)
+  headers: Map<string, Header>;
   style: Style;
   explode: boolean;
   allowReserved: boolean;

@@ -7,14 +7,14 @@ import { Header } from './header.model';
 import { SecurityScheme } from './security-scheme.model';
 import { Link } from './link.model';
 import { Callback } from './callback.model';
-export interface Components {
-  schemas: { [key: string]: Schema };
-  responses: { [key: string]: Response };
-  parameters: { [key: string]: Parameter };
-  examples: { [key: string]: Example };
-  requestBodies: { [key: string]: RequestBody };
-  headers: { [key: string]: Header };
-  securitySchemes: { [key: string]: SecurityScheme };
-  links: { [key: string]: Link };
-  callbacks: { [key: string]: Callback };
+export class Components {
+  schemas: Map<string, Schema>;
+  responses: Map<string, Response>;
+  parameters: Map<string, Parameter>;
+  examples: Map<string, Example>;
+  requestBodies: Map<string, RequestBody>;
+  headers: Map<string, Header>;
+  securitySchemes: Map<string, SecurityScheme>;
+  links: Map<string, Link>;
+  callbacks: Map<string, Callback>;
 }

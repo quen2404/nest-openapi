@@ -1,4 +1,4 @@
-export interface Xml {
+export class Xml {
   name: string;
   namespace: string;
   prefix: string;

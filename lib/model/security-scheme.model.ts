@@ -1,6 +1,6 @@
 import { OAuthFlows } from './oauth-flows.model';
 
-export interface SecurityScheme {
+export class SecurityScheme {
   type: string;
   description: string;
   name: string;

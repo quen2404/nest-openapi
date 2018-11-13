@@ -1,16 +1,14 @@
 import { MediaType } from './media-type.model';
 import { Header } from './header.model';
 import { Link } from './link.model';
+import { Type } from 'class-transformer';
 
-export interface Response {
+export class Response {
   description: string;
-  headers: {
-    [name: string]: Header;
-  };
-  content: {
-    [name: string]: MediaType;
-  };
-  links: {
-    [name: string]: Link;
-  };
+  @Type(() => Header)
+  headers: Map<string, Header>;
+  @Type(() => MediaType)
+  content: Map<string, MediaType>;
+  @Type(() => Link)
+  links: Map<string, Link>;
 }

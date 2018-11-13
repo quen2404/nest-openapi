@@ -1,10 +1,11 @@
 import { Schema } from './schema.model';
 import { Example } from './example.model';
 import { MediaType } from './media-type.model';
+import { Type } from 'class-transformer';
 
-export interface Parameter {
+export class Parameter {
   name: string;
-  in: string;
+  in: In;
   description: string;
   required: boolean;
   deprecated: boolean;
@@ -12,14 +13,20 @@ export interface Parameter {
   style: string;
   explode: boolean;
   allowReserved: boolean;
+  @Type(() => Schema)
   schema: Schema;
   example: any;
-  examples: {
-    [name: string]: Example;
-  };
-  content: {
-    [name: string]: MediaType;
-  };
+  @Type(() => Example)
+  examples: Map<string, Example>;
+  @Type(() => MediaType)
+  content: Map<string, MediaType>;
+}
+
+export enum In {
+  QUERY = 'query',
+  HEADER = 'header',
+  PATH = 'path',
+  COOKIE = 'cookie'
 }
 
 export enum Style {

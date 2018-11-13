@@ -1,5 +1,5 @@
 import { Response } from './response.model';
-export interface Responses {
-  default: Response;
-  [code: string]: Response;
+export class Responses extends Map<Response> {
+  // default: Response;
+  // [code: string]: Response;
 }

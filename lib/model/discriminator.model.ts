@@ -1,6 +1,4 @@
-export interface Discriminator {
+export class Discriminator {
   propertyName: string;
-  mapping: {
-    [name: string]: string;
-  };
+  mapping: Map<string, string>;
 }

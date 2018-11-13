@@ -1,8 +1,8 @@
 import { ServerVariable } from './server-variable.model';
-export interface Server {
+import { Type } from 'class-transformer';
+export class Server {
   url: string;
   description: string;
-  variables: {
-    [key: string]: ServerVariable;
-  };
+  @Type(() => ServerVariable)
+  variables: Map<string, ServerVariable>;
 }

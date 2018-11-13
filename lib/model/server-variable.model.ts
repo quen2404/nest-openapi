@@ -1,4 +1,4 @@
-export interface ServerVariable {
+export class ServerVariable {
   enum: string[];
   default: string;
   description: string;

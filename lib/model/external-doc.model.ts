@@ -1,4 +1,4 @@
-export interface ExternalDocumentation {
+export class ExternalDocumentation {
   description: string;
   url: string;
 }

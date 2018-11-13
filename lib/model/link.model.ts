@@ -1,12 +1,12 @@
 import { Server } from './server.model';
+import { Type } from 'class-transformer';
 
-export interface Link {
+export class Link {
   operationRef: string;
   operationId: string;
-  parameters: {
-    [name: string]: any;
-  };
+  parameters: Map<string, any>;
   requestBody: any;
   description: string;
+  @Type(() => Server)
   server: Server;
 }

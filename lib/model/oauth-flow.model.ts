@@ -1,8 +1,6 @@
-export interface OAuthFlow {
+export class OAuthFlow {
   authorizationUrl: string;
   tokenUrl: string;
   refreshUrl: string;
-  scopes: {
-    [name: string]: string;
-  };
+  scopes: Map<string, string>;
 }

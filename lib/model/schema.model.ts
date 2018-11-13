@@ -1,8 +1,9 @@
 import { Discriminator } from './discriminator.model';
 import { Xml } from './xml.model';
 import { ExternalDocumentation } from './external-doc.model';
+import { Type } from 'class-transformer';
 
-export interface Schema {
+export class Schema {
   title: string;
   multipleOf: number;
   maximum: number;
@@ -25,9 +26,8 @@ export interface Schema {
   anyOf: Schema;
   not: Schema;
   items: Schema;
-  properties: {
-    [name: string]: Schema;
-  };
+  @Type(() => Schema)
+  properties: Map<string, Schema>;
   additionalProperties: boolean | Schema;
   description: string;
   format: DataTypeFormat;
@@ -43,6 +43,9 @@ export interface Schema {
 }
 
 export enum DataType {
+  NULL = 'null',
+  OBJECT = 'object',
+  ARRAY = 'array',
   INTEGER = 'integer',
   NUMBER = 'number',
   STRING = 'string',

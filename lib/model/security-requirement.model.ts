@@ -1,3 +1,1 @@
-export interface SecurityRequirement {
-  [name: string]: string[];
-}
+export class SecurityRequirement extends Map<string, string[]> {}

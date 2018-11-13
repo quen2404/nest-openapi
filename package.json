@@ -13,7 +13,8 @@
     "prepublish:next": "npm run build",
     "publish:next": "npm publish --access public --tag next",
     "prepublish:npm": "npm run build",
-    "publish:npm": "npm publish --access public"
+    "publish:npm": "npm publish --access public",
+    "test": "ts-node test/test.ts"
   },
   "repository": {
     "type": "git",
@@ -30,13 +31,15 @@
   },
   "homepage": "https://github.com/qdesrame/nest-openapi#readme",
   "devDependencies": {
+    "@types/camelcase": "^4.1.0",
     "@nestjs/common": "^5.4.0",
     "@nestjs/core": "^5.4.0",
+    "@types/js-yaml": "^3.11.2",
     "@types/node": "^10.12.5",
     "husky": "^1.1.3",
     "lint-staged": "^8.0.4",
     "prettier": "^1.15.2",
-    "reflect-metadata": "^0.1.12",
+    "ts-node": "^7.0.1",
     "typescript": "^3.1.6"
   },
   "peerDependencies": {
@@ -50,8 +53,10 @@
     ]
   },
   "dependencies": {
-    "@types/camelcase": "^4.1.0",
     "camelcase": "^5.0.0",
-    "ts-simple-ast": "^18.1.0"
+    "class-transformer": "^0.2.0",
+    "js-yaml": "^3.12.0",
+    "ts-simple-ast": "^18.1.0",
+    "reflect-metadata": "^0.1.12"
   }
 }
