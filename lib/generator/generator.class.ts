@@ -25,47 +25,65 @@ export class Generator {
     });
   }
 
-  public formatPath(path: string): string {
+  public extractNameFromPath(path: string): string {
     const re = /[\/\{\}]/gi;
     return path.replace(re, '');
+  }
+
+  public formatPath(path: string): string {
+    const re = /\{([^/]+)\}/gi;
+    return path.replace(re, ':$1');
   }
 
   public testPaths() {
     this.openApi.paths.forEach((pathItem, path) => {
       console.log('path', path);
       // const pathItem = this.openApi.paths[path];
-      const name = this.formatPath(path);
+      const name = this.extractNameFromPath(path);
+      const nestPath = this.formatPath(path);
       const tsAstHelper = new TypeScriptAst();
-      const tsFile: SourceFile = tsAstHelper.createSourceFile(
+      const serviceFile: SourceFile = tsAstHelper.createSourceFile(
+        `${this.outputPath}/services/${name}.interface.ts`,
+        '',
+        {
+          overwrite: true
+        }
+      );
+      const controllerFile: SourceFile = tsAstHelper.createSourceFile(
         `${this.outputPath}/controllers/${name}.controller.ts`,
         '',
         {
           overwrite: true
         }
       );
-      tsFile.addImportDeclaration({
+      controllerFile.addImportDeclaration({
         namedImports: ['Controller'],
         moduleSpecifier: '@nestjs/common'
       });
-      const pathClass: ClassDeclaration = tsFile.addClass({
+      const controllerClass: ClassDeclaration = controllerFile.addClass({
         name: `${capitalize(name)}Controller`,
         isExported: true,
         decorators: [
           {
             name: 'Controller',
-            arguments: [`"${path}"`]
+            arguments: [`'${nestPath}'`]
           }
         ]
       });
-      this.testOperation('get', pathItem.get, pathClass);
-      this.testOperation('put', pathItem.put, pathClass);
-      this.testOperation('post', pathItem.post, pathClass);
-      this.testOperation('delete', pathItem.delete, pathClass);
-      this.testOperation('options', pathItem.options, pathClass);
-      this.testOperation('head', pathItem.head, pathClass);
-      this.testOperation('patch', pathItem.patch, pathClass);
-      this.testOperation('trace', pathItem.trace, pathClass);
-      tsFile.saveSync();
+      const serviceClass = serviceFile.addInterface({
+        name: `${capitalize(name)}Service`,
+        isExported: true
+      });
+      this.testOperation('get', pathItem.get, controllerClass);
+      this.testOperation('put', pathItem.put, controllerClass);
+      this.testOperation('post', pathItem.post, controllerClass);
+      this.testOperation('delete', pathItem.delete, controllerClass);
+      this.testOperation('options', pathItem.options, controllerClass);
+      this.testOperation('head', pathItem.head, controllerClass);
+      this.testOperation('patch', pathItem.patch, controllerClass);
+      this.testOperation('trace', pathItem.trace, controllerClass);
+      controllerFile.saveSync();
+      serviceFile.saveSync();
     });
   }
 
