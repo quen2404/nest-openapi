@@ -108,12 +108,19 @@ export class Generator {
           arguments: []
         }
       ],
-      returnType: this.getTypeFromResponses(operation.responses)
+      isAsync: true,
+      returnType: this.promisifyType(
+        this.getTypeFromResponses(operation.responses)
+      )
     });
     operation.parameters.forEach((parameter: Parameter) => {
       this.testParameter(parameter, method);
     });
     this.testRequestBody(operation.requestBody, method);
+  }
+
+  public promisifyType(type: string) {
+    return `Promise<${type}>`;
   }
 
   public getTypeFromResponses(responses: Responses) {
@@ -173,7 +180,31 @@ export class Generator {
     return 'any'; //TODO
   }
 
-  public testRequestBody(requestBody: RequestBody, method: MethodDeclaration) {}
+  public testRequestBody(requestBody: RequestBody, method: MethodDeclaration) {
+    if (
+      !requestBody ||
+      !requestBody.content ||
+      !requestBody.content.get('application/json')
+    ) {
+      return;
+    }
+    const content = requestBody.content.get('application/json');
+    content.schema;
+    method.getSourceFile().addImportDeclaration({
+      namedImports: ['Body'],
+      moduleSpecifier: '@nestjs/common'
+    });
+    method.addParameter({
+      name: 'body',
+      decorators: [
+        {
+          name: 'Body',
+          arguments: []
+        }
+      ],
+      type: this.getTypeFromSchema(content.schema)
+    });
+  }
 
   public testSchemas() {
     Object.keys(this.openApi.components.schemas).forEach(name => {
