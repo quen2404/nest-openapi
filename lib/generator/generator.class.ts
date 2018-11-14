@@ -2,7 +2,6 @@ import TypeScriptAst, {
   SourceFile,
   ClassDeclaration,
   MethodDeclaration,
-  SwitchStatement,
   CodeBlockWriter,
   Scope,
   InterfaceDeclaration,
@@ -16,17 +15,24 @@ import {
   Parameter,
   In,
   Responses,
-  RequestBody,
-  DataType
+  RequestBody
 } from '../model';
 import { capitalize } from '../utils';
+import { SchemaGenerator } from './schema.generator';
 
 export class Generator {
+  private schemaGen: SchemaGenerator;
   constructor(private outputPath: string, private openApi: OpenAPI) {
+    this.schemaGen = new SchemaGenerator(outputPath, openApi);
     const tsAstHelper = new TypeScriptAst();
     const tsFile: SourceFile = tsAstHelper.createSourceFile(outputPath, '', {
       overwrite: true
     });
+  }
+
+  public generate() {
+    this.testPaths();
+    this.schemaGen.testSchemas();
   }
 
   public extractNameFromPath(path: string): string {
@@ -231,28 +237,12 @@ export class Generator {
           arguments: decoratorArgs
         }
       ],
-      type: this.getTypeFromSchema(parameter.schema)
+      type: this.schemaGen.getTypeFromSchema(parameter.schema)
     });
     methodService.addParameter({
       name: parameter.name,
-      type: this.getTypeFromSchema(parameter.schema)
+      type: this.schemaGen.getTypeFromSchema(parameter.schema)
     });
-  }
-
-  public getTypeFromSchema(schema: Schema): string {
-    if (schema.type) {
-      if (schema.type == DataType.INTEGER) {
-        return DataType.NUMBER;
-      }
-      if (schema.type == DataType.ARRAY) {
-        return this.getTypeFromSchema(schema.items) + '[]';
-      }
-      if (schema.type == DataType.OBJECT || schema.type == DataType.NULL) {
-        return 'any';
-      }
-      return schema.type;
-    }
-    return 'any'; //TODO
   }
 
   public testRequestBody(
@@ -281,11 +271,11 @@ export class Generator {
           arguments: []
         }
       ],
-      type: this.getTypeFromSchema(content.schema)
+      type: this.schemaGen.getTypeFromSchema(content.schema)
     });
     methodService.addParameter({
       name: 'body',
-      type: this.getTypeFromSchema(content.schema)
+      type: this.schemaGen.getTypeFromSchema(content.schema)
     });
   }
 
