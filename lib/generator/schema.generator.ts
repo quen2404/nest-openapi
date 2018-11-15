@@ -6,31 +6,25 @@ export class SchemaGenerator {
   constructor(private outputPath: string, private openapi: OpenAPI) {}
 
   testSchemas() {
-    this.openapi.components.schemas.forEach((schema, name) =>
-      this.testSchema(name, schema)
-    );
+    this.openapi.components.schemas.forEach((schema, name) => this.testSchema(name, schema));
   }
 
   testSchema(name: string, schema: Schema) {
     const tsAstHelper = new TypeScriptAst();
     const fileName = `dto/${camelToKebab(name)}.dto.ts`;
-    const tsFile: SourceFile = tsAstHelper.createSourceFile(
-      `${this.outputPath}/${fileName}`,
-      '',
-      {
-        overwrite: true
-      }
-    );
+    const tsFile: SourceFile = tsAstHelper.createSourceFile(`${this.outputPath}/${fileName}`, '', {
+      overwrite: true,
+    });
     const className = capitalize(`${name}Dto`);
     const schemaClass = tsFile.addClass({
       name: className,
-      isExported: true
+      isExported: true,
     });
     if (schema.properties) {
       schema.properties.forEach((propSchema, propName) => {
         schemaClass.addProperty({
           name: propName,
-          type: this.getTypeFromSchema(propSchema)
+          type: this.getTypeFromSchema(propSchema),
         });
       });
     }

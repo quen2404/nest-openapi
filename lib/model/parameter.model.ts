@@ -26,7 +26,7 @@ export enum In {
   QUERY = 'query',
   HEADER = 'header',
   PATH = 'path',
-  COOKIE = 'cookie'
+  COOKIE = 'cookie',
 }
 
 export enum Style {
@@ -36,5 +36,5 @@ export enum Style {
   SIMPLE = 'simple',
   SPACE_DELIMITED = 'spaceDelimited',
   PIPE_DELIMITED = 'pipeDelimited',
-  DEEP_OBJECT = 'deepObject'
+  DEEP_OBJECT = 'deepObject',
 }

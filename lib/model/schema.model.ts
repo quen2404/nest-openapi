@@ -49,7 +49,7 @@ export enum DataType {
   INTEGER = 'integer',
   NUMBER = 'number',
   STRING = 'string',
-  BOOLEAN = 'boolean'
+  BOOLEAN = 'boolean',
 }
 
 export enum DataTypeFormat {
@@ -61,5 +61,5 @@ export enum DataTypeFormat {
   BINARY = 'binary',
   DATE = 'date',
   DATE_TIME = 'date-time',
-  PASSWORD = 'password'
+  PASSWORD = 'password',
 }
