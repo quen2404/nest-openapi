@@ -19,13 +19,18 @@ export class Schema extends Reference {
   uniqueItems: true;
   maxProperties: number;
   minProperties: number;
-  required: boolean;
+  required: boolean[];
   enum: any[];
   type: DataType;
-  allOf: Schema;
-  oneOf: Schema;
-  anyOf: Schema;
+  @Type(() => Schema)
+  allOf: Schema[];
+  @Type(() => Schema)
+  oneOf: Schema[];
+  @Type(() => Schema)
+  anyOf: Schema[];
+  @Type(() => Schema)
   not: Schema;
+  @Type(() => Schema)
   items: Schema;
   @Type(() => Schema)
   properties: Map<string, Schema>;
@@ -34,13 +39,16 @@ export class Schema extends Reference {
   format: DataTypeFormat;
   default: any;
   nullable: boolean;
+  @Type(() => Discriminator)
   discriminator: Discriminator;
   readOnly: boolean;
   writeOnly: boolean;
+  @Type(() => Xml)
   xml: Xml;
+  @Type(() => ExternalDocumentation)
   externalDocs: ExternalDocumentation;
   example: any;
-  depreacted: boolean;
+  deprecated: boolean;
 }
 
 export enum DataType {
