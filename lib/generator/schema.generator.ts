@@ -16,9 +16,8 @@ export class SchemaGenerator {
     const tsFile: SourceFile = tsAstHelper.createSourceFile(`${this.outputPath}/${schemaType.file}`, '', {
       overwrite: true,
     });
-    const className = capitalize(`${name}Dto`);
     const schemaClass = tsFile.addClass({
-      name: className,
+      name: schemaType.name,
       isExported: true,
     });
     if (schema.properties) {
