@@ -1,4 +1,4 @@
-import TypeScriptAst, { SourceFile, ImportDeclarationStructure } from 'ts-simple-ast';
+import TypeScriptAst, { SourceFile, ImportDeclarationStructure, ClassDeclaration } from 'ts-simple-ast';
 import { OpenAPI, Schema, DataType } from '../model';
 import { capitalize, camelToKebab } from '../utils';
 import { textChangeRangeIsUnchanged } from 'typescript';
@@ -20,8 +20,26 @@ export class SchemaGenerator {
       name: schemaType.name,
       isExported: true,
     });
-    if (schema.properties) {
-      schema.properties.forEach((propSchema, propName) => {
+    this.generateProperties(schemaClass, schema.properties);
+    if (schema.allOf && schema.allOf.length > 0) {
+      schema.allOf.forEach(subSchema => {
+        if (subSchema.$ref) {
+          const subSchemaType = this.getSchemaType(subSchema);
+          schemaClass
+            .setExtends(subSchemaType.name)
+            .getSourceFile()
+            .addImportDeclaration(subSchemaType.getImportDeclaration());
+        } else {
+          this.generateProperties(schemaClass, subSchema.properties);
+        }
+      });
+    }
+    tsFile.organizeImports().saveSync();
+  }
+
+  generateProperties(schemaClass: ClassDeclaration, properties: Map<string, Schema>) {
+    if (properties) {
+      properties.forEach((propSchema, propName) => {
         const schemaType = this.getSchemaType(propSchema);
         schemaClass.addProperty({
           name: propName,
@@ -29,16 +47,19 @@ export class SchemaGenerator {
         });
       });
     }
-    tsFile.organizeImports().saveSync();
   }
 
   public getSchemaTypeFromName(name: string): SchemaType {
     return new SchemaType(name, `dto/${camelToKebab(name)}.dto`);
   }
 
+  public getNameFromRef(ref: string): string {
+    return ref.split('/').pop();
+  }
+
   public getSchemaType(schema: Schema): SchemaType {
     if (schema.$ref) {
-      return this.getSchemaTypeFromName(schema.$ref.split('/').pop());
+      return this.getSchemaTypeFromName(this.getNameFromRef(schema.$ref));
     }
     if (schema.type) {
       if (schema.type == DataType.INTEGER) {
