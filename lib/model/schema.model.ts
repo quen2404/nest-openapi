@@ -7,20 +7,20 @@ import { Reference } from './reference.model';
 export class Schema extends Reference {
   title: string;
   multipleOf: number;
-  maximum: number;
-  exclusiveMaximum: boolean;
-  minimum: number;
-  exclusiveMinimum: boolean;
-  maxLength: number;
-  minLength: number;
-  pattern: string; //RegExp ?
-  maxItems: number;
-  minItems: number;
-  uniqueItems: true;
-  maxProperties: number;
-  minProperties: number;
-  required: boolean[];
-  enum: any[];
+  maximum?: number;
+  exclusiveMaximum?: boolean;
+  minimum?: number;
+  exclusiveMinimum?: boolean;
+  maxLength?: number;
+  minLength?: number;
+  pattern?: string; //RegExp ?
+  maxItems?: number;
+  minItems?: number;
+  uniqueItems?: boolean;
+  maxProperties?: number;
+  minProperties?: number;
+  required?: boolean[];
+  enum?: any[];
   type: DataType;
   @Type(() => Schema)
   allOf: Schema[];

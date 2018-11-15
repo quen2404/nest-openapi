@@ -1,4 +1,9 @@
-import TypeScriptAst, { SourceFile, ImportDeclarationStructure, ClassDeclaration } from 'ts-simple-ast';
+import TypeScriptAst, {
+  SourceFile,
+  ImportDeclarationStructure,
+  ClassDeclaration,
+  DecoratorStructure,
+} from 'ts-simple-ast';
 import { OpenAPI, Schema, DataType } from '../model';
 import { capitalize, camelToKebab } from '../utils';
 import { textChangeRangeIsUnchanged } from 'typescript';
@@ -37,13 +42,71 @@ export class SchemaGenerator {
     tsFile.organizeImports().saveSync();
   }
 
+  addValidatorImport(name: string): ImportDeclarationStructure {
+    return {
+      moduleSpecifier: 'class-validator',
+      namedImports: [name],
+    };
+  }
+
   generateProperties(schemaClass: ClassDeclaration, properties: Map<string, Schema>) {
     if (properties) {
-      properties.forEach((propSchema, propName) => {
-        const schemaType = this.getSchemaType(propSchema);
+      properties.forEach((schema, name) => {
+        const schemaType = this.getSchemaType(schema);
+        const decorators: DecoratorStructure[] = [];
+        if (schema.minimum != null) {
+          decorators.push({
+            name: 'Min',
+            arguments: [`${schema.minimum}`],
+          });
+          schemaClass.getSourceFile().addImportDeclaration(this.addValidatorImport('Min'));
+        }
+        if (schema.maximum != null) {
+          decorators.push({
+            name: 'Max',
+            arguments: [`${schema.minimum}`],
+          });
+          schemaClass.getSourceFile().addImportDeclaration(this.addValidatorImport('Max'));
+        }
+        if (schema.minLength != null) {
+          decorators.push({
+            name: 'MinLength',
+            arguments: [`${schema.minLength}`],
+          });
+          schemaClass.getSourceFile().addImportDeclaration(this.addValidatorImport('MinLength'));
+        }
+        if (schema.maxLength != null) {
+          decorators.push({
+            name: 'MaxLength',
+            arguments: [`${schema.maxLength}`],
+          });
+          schemaClass.getSourceFile().addImportDeclaration(this.addValidatorImport('MaxLength'));
+        }
+        if (schema.pattern != null) {
+          decorators.push({
+            name: 'Matcher',
+            arguments: [`${schema.pattern}`],
+          });
+          schemaClass.getSourceFile().addImportDeclaration(this.addValidatorImport('Matcher'));
+        }
+        if (schema.minItems != null) {
+          decorators.push({
+            name: 'ArrayMinSize',
+            arguments: [`${schema.minItems}`],
+          });
+          schemaClass.getSourceFile().addImportDeclaration(this.addValidatorImport('ArrayMinSize'));
+        }
+        if (schema.maxItems != null) {
+          decorators.push({
+            name: 'ArrayMaxSize',
+            arguments: [`${schema.maxItems}`],
+          });
+          schemaClass.getSourceFile().addImportDeclaration(this.addValidatorImport('ArrayMaxSize'));
+        }
         schemaClass.addProperty({
-          name: propName,
+          name: name,
           type: schemaType.type,
+          decorators,
         });
       });
     }
