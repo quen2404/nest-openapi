@@ -181,6 +181,11 @@ export class Generator {
       namedImports: [decoratorName],
       moduleSpecifier: '@nestjs/common',
     });
+    const schemaType = this.schemaGen.getSchemaType(parameter.schema);
+    if (schemaType.needImport) {
+      methodController.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
+      methodService.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
+    }
     methodController.addParameter({
       name: parameter.name,
       decorators: [
@@ -189,11 +194,11 @@ export class Generator {
           arguments: decoratorArgs,
         },
       ],
-      type: this.schemaGen.getTypeFromSchema(parameter.schema),
+      type: schemaType.type,
     });
     methodService.addParameter({
       name: parameter.name,
-      type: this.schemaGen.getTypeFromSchema(parameter.schema),
+      type: schemaType.type,
     });
   }
 
@@ -211,6 +216,12 @@ export class Generator {
       namedImports: ['Body'],
       moduleSpecifier: '@nestjs/common',
     });
+    const schemaType = this.schemaGen.getSchemaType(content.schema);
+    if (schemaType.needImport) {
+      console.log('need import !:', schemaType.type);
+      methodController.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
+      methodService.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
+    }
     methodController.addParameter({
       name: 'body',
       decorators: [
@@ -219,11 +230,11 @@ export class Generator {
           arguments: [],
         },
       ],
-      type: this.schemaGen.getTypeFromSchema(content.schema),
+      type: schemaType.type,
     });
     methodService.addParameter({
       name: 'body',
-      type: this.schemaGen.getTypeFromSchema(content.schema),
+      type: schemaType.type,
     });
   }
 

@@ -2,8 +2,9 @@ import { Discriminator } from './discriminator.model';
 import { Xml } from './xml.model';
 import { ExternalDocumentation } from './external-doc.model';
 import { Type } from 'class-transformer';
+import { Reference } from './reference.model';
 
-export class Schema {
+export class Schema extends Reference {
   title: string;
   multipleOf: number;
   maximum: number;
