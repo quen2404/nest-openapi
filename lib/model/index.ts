@@ -19,7 +19,6 @@ export * from './path-item.model';
 export * from './reference.model';
 export * from './request-body.model';
 export * from './response.model';
-export * from './responses.model';
 export * from './schema.model';
 export * from './security-requirement.model';
 export * from './security-scheme.model';

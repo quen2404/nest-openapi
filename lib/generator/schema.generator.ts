@@ -157,6 +157,10 @@ export class SchemaType {
     return `${this.module}.ts`;
   }
 
+  get promisifyName(): string {
+    return `Promise<${this.name}>`;
+  }
+
   get needImport(): boolean {
     return this.module != null;
   }
@@ -171,3 +175,7 @@ export class SchemaType {
     };
   }
 }
+
+export const TYPE_ANY = new SchemaType('any');
+export const TYPE_NEVER = new SchemaType('never');
+export const TYPE_VOID = new SchemaType('void');

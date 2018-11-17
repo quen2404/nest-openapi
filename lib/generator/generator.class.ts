@@ -8,9 +8,9 @@ import TypeScriptAst, {
   MethodSignature,
 } from 'ts-simple-ast';
 import * as camelcase from 'camelcase';
-import { OpenAPI, Schema, Operation, Parameter, In, Responses, RequestBody } from '../model';
+import { OpenAPI, Schema, Operation, Parameter, In, RequestBody, Response, MediaType } from '../model';
 import { capitalize } from '../utils';
-import { SchemaGenerator } from './schema.generator';
+import { SchemaGenerator, SchemaType, TYPE_ANY, TYPE_VOID } from './schema.generator';
 
 export class Generator {
   private schemaGen: SchemaGenerator;
@@ -120,6 +120,11 @@ export class Generator {
       namedImports: [capitalize(name)],
       moduleSpecifier: '@nestjs/common',
     });
+    const responseType = this.getTypeFromResponses(operation.responses);
+    if (responseType.needImport) {
+      controllerClass.getSourceFile().addImportDeclaration(responseType.getImportDeclaration());
+      serviceClass.getSourceFile().addImportDeclaration(responseType.getImportDeclaration());
+    }
     const methodController = controllerClass.addMethod({
       name: methodName,
       decorators: [
@@ -129,11 +134,11 @@ export class Generator {
         },
       ],
       isAsync: true,
-      returnType: this.promisifyType(this.getTypeFromResponses(operation.responses)),
+      returnType: responseType.promisifyName,
     });
     const methodService = serviceClass.addMethod({
       name: methodName,
-      returnType: this.promisifyType(this.getTypeFromResponses(operation.responses)),
+      returnType: responseType.promisifyName,
     });
     operation.parameters.forEach((parameter: Parameter) => {
       this.testParameter(parameter, methodController, methodService);
@@ -144,17 +149,46 @@ export class Generator {
         .getParameters()
         .map(param => param.getName())
         .join(', ');
-      write.write(`this.${camelcase(serviceClass.getName())}.${methodName}(${parameters});`);
+      write.write(`return await this.${camelcase(serviceClass.getName())}.${methodName}(${parameters});`);
     });
   }
 
-  public promisifyType(type: string) {
-    return `Promise<${type}>`;
+  public getTypeFromResponses(responses: Map<string, Response>): SchemaType {
+    // TODO
+    let type: SchemaType = null;
+    if (responses != null) {
+      responses.forEach((response, code) => {
+        if (code.startsWith('2') && type == null) {
+          if (code !== '204') {
+            type = this.getTypeFromResponse(response);
+          } else {
+            type = TYPE_VOID;
+          }
+        }
+      });
+    }
+    if (type == null) {
+      return TYPE_ANY;
+    }
+    return type;
   }
 
-  public getTypeFromResponses(responses: Responses) {
-    // TODO
-    return 'any';
+  public getTypeFromResponse(response: Response): SchemaType {
+    let type: SchemaType = null;
+    if (response.content != null) {
+      type = this.getTypeFromMediaType(response.content.get('application/json'));
+    }
+    if (type == null) {
+      return TYPE_ANY;
+    }
+    return type;
+  }
+
+  public getTypeFromMediaType(mediatype: MediaType): SchemaType {
+    if (mediatype.schema != null) {
+      return this.schemaGen.getSchemaType(mediatype.schema);
+    }
+    return TYPE_ANY;
   }
 
   public getParameterDecorator(parameter: Parameter): string {
@@ -211,7 +245,6 @@ export class Generator {
       return;
     }
     const content = requestBody.content.get('application/json');
-    content.schema;
     methodController.getSourceFile().addImportDeclaration({
       namedImports: ['Body'],
       moduleSpecifier: '@nestjs/common',

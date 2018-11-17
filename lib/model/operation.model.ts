@@ -1,11 +1,11 @@
 import { ExternalDocumentation } from './external-doc.model';
 import { Parameter } from './parameter.model';
 import { RequestBody } from './request-body.model';
-import { Responses } from './responses.model';
 import { Callback } from './callback.model';
 import { SecurityRequirement } from './security-requirement.model';
 import { Server } from './server.model';
 import { Type, Expose } from 'class-transformer';
+import { Response } from './response.model';
 export class Operation {
   tags: string[];
   summary: string;
@@ -18,8 +18,8 @@ export class Operation {
   _parameters: Parameter[];
   @Type(() => RequestBody)
   requestBody: RequestBody;
-  @Type(() => Responses)
-  responses: Responses;
+  @Type(() => Response)
+  responses: Map<string, Response>;
   @Type(() => Callback)
   callbacks: Map<string, Callback>;
   deprecated: boolean;
