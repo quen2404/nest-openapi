@@ -1,12 +1,12 @@
 import TypeScriptAst, {
-  SourceFile,
-  ImportDeclarationStructure,
   ClassDeclaration,
   DecoratorStructure,
+  ImportDeclarationStructure,
+  SourceFile,
 } from 'ts-simple-ast';
-import { OpenAPI, Schema, DataType } from '../model';
-import { capitalize, camelToKebab } from '../utils';
-import { textChangeRangeIsUnchanged } from 'typescript';
+import { DataType, OpenAPI, Schema } from '../model';
+import { camelToKebab } from '../utils';
+import { SchemaType } from './schema-type.class';
 
 export class SchemaGenerator {
   constructor(private outputPath: string, private openapi: OpenAPI) {}
@@ -141,41 +141,3 @@ export class SchemaGenerator {
     return new SchemaType('any'); //TODO
   }
 }
-
-export class SchemaType {
-  constructor(public name: string, public module?: string, public isArray?: boolean) {
-    if (isArray == null) {
-      this.isArray = false;
-    }
-  }
-
-  get type(): string {
-    return this.name + (this.isArray ? '[]' : '');
-  }
-
-  get file(): string {
-    return `${this.module}.ts`;
-  }
-
-  get promisifyName(): string {
-    return `Promise<${this.name}>`;
-  }
-
-  get needImport(): boolean {
-    return this.module != null;
-  }
-
-  getImportDeclaration(): ImportDeclarationStructure {
-    if (!this.needImport) {
-      return null;
-    }
-    return {
-      moduleSpecifier: `../${this.module}`,
-      namedImports: [this.name],
-    };
-  }
-}
-
-export const TYPE_ANY = new SchemaType('any');
-export const TYPE_NEVER = new SchemaType('never');
-export const TYPE_VOID = new SchemaType('void');
