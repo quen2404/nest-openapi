@@ -1,6 +1,6 @@
-import { SchemaType, TYPE_VOID, TYPE_ANY } from './schema-type.class';
-import { Response, OpenAPI } from '../model';
+import { OpenAPI, Response } from '../model';
 import { MediaTypeGenerator } from './media-type.generator';
+import { SchemaType, TYPE_ANY, TYPE_VOID } from './schema-type.class';
 
 export class ResponseGenerator {
   public constructor(private outputPath: string, private openapi: OpenAPI, private mediaTypeGen: MediaTypeGenerator) {}

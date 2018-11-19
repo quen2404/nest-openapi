@@ -1,6 +1,5 @@
-import { RequestBody, OpenAPI } from '../model';
 import { MethodDeclaration, MethodSignature } from 'ts-simple-ast';
-import { SchemaGenerator } from './schema.generator';
+import { OpenAPI, RequestBody } from '../model';
 import { MediaTypeGenerator } from './media-type.generator';
 
 export class RequestBodyGenerator {

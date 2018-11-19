@@ -1,6 +1,6 @@
 import * as camelcase from 'camelcase';
-import { Parameter, In, OpenAPI } from '../model';
 import { MethodDeclaration, MethodSignature } from 'ts-simple-ast';
+import { In, OpenAPI, Parameter } from '../model';
 import { SchemaGenerator } from './schema.generator';
 
 export class ParameterGenerator {
