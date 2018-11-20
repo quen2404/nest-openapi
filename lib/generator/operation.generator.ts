@@ -20,6 +20,7 @@ export class OperationGenerator {
     operation: Operation,
     controllerClass: ClassDeclaration,
     serviceClass: InterfaceDeclaration,
+    lastSegment?: string,
   ) {
     if (operation == null) {
       return;
@@ -35,12 +36,16 @@ export class OperationGenerator {
       controllerClass.getSourceFile().addImportDeclaration(responseType.getImportDeclaration());
       serviceClass.getSourceFile().addImportDeclaration(responseType.getImportDeclaration());
     }
+    const decoratorArguments: string[] = [];
+    if (lastSegment) {
+      decoratorArguments.push(`"${lastSegment}"`);
+    }
     const methodController = controllerClass.addMethod({
       name: methodName,
       decorators: [
         {
           name: capitalize(name),
-          arguments: [],
+          arguments: decoratorArguments,
         },
       ],
       isAsync: true,

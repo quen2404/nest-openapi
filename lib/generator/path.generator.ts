@@ -1,11 +1,23 @@
 import * as camelcase from 'camelcase';
-import TypeScriptAst, { ClassDeclaration, Scope, SourceFile } from 'ts-simple-ast';
-import { OpenAPI } from '../model';
+import TypeScriptAst, {
+  ClassDeclaration,
+  Scope,
+  SourceFile,
+  ClassDeclarationStructure,
+  InterfaceDeclaration,
+} from 'ts-simple-ast';
+import { OpenAPI, PathItem } from '../model';
 import { capitalize } from '../utils';
 import { OperationGenerator } from './operation.generator';
 
 export class PathGenerator {
-  constructor(private outputPath: string, private openapi: OpenAPI, private operationGen: OperationGenerator) {}
+  private tsAstHelper = new TypeScriptAst();
+  private controllersClasses = new Map<string, SourceFile>();
+  private servicesClasses = new Map<string, SourceFile>();
+
+  constructor(private outputPath: string, private openapi: OpenAPI, private operationGen: OperationGenerator) {
+    this.tsAstHelper = new TypeScriptAst();
+  }
 
   public extractNameFromPath(path: string): string {
     const re = /[\/\{\}]/gi;
@@ -17,33 +29,87 @@ export class PathGenerator {
     return path.replace(re, ':$1');
   }
 
+  public removeLastSegment(path: string): string {
+    const re = /^(.*)\/\{([^\/]+)\}$/gi;
+    return path.replace(re, '$1');
+  }
+
+  public extractLastSegment(path: string): string {
+    const re = /^(.*)\/\{([^\/]+)\}$/gi;
+    const extract = path.replace(re, ':$2');
+    if (extract.startsWith(':')) {
+      return extract;
+    }
+    return null;
+  }
+
   public testPaths() {
     this.openapi.paths.forEach((pathItem, path) => {
-      console.log('path', path);
-      // const pathItem = this.openapi.paths[path];
       const name = this.extractNameFromPath(path);
-      const nestPath = this.formatPath(path);
-      const tsAstHelper = new TypeScriptAst();
-      const serviceFileName = `services/${name}.interface`;
-      const serviceFile: SourceFile = tsAstHelper.createSourceFile(`${this.outputPath}/${serviceFileName}.ts`, '', {
-        overwrite: true,
-      });
-      const controllerFileName = `controllers/${name}.controller`;
-      const controllerFile: SourceFile = tsAstHelper.createSourceFile(
-        `${this.outputPath}/${controllerFileName}.ts`,
-        '',
-        {
-          overwrite: true,
-        },
+      const formalizedPath = this.removeLastSegment(path);
+      const serviceFile = this.getOrCreateSourceFile(
+        this.servicesClasses,
+        formalizedPath,
+        `services/${name}.interface`,
       );
-      controllerFile.addImportDeclaration({
-        namedImports: ['Controller'],
-        moduleSpecifier: '@nestjs/common',
-      });
+      const controllerFile = this.getOrCreateSourceFile(
+        this.controllersClasses,
+        formalizedPath,
+        `controllers/${name}.controller`,
+      );
       const serviceClassName = `${capitalize(name)}Service`;
-      const serviceName = camelcase(serviceClassName);
-      const controllerClass: ClassDeclaration = controllerFile.addClass({
-        name: `${capitalize(name)}Controller`,
+      const serviceFileName = `services/${name}.interface`;
+      controllerFile.addImportDeclaration({
+        namedImports: [serviceClassName],
+        moduleSpecifier: `../${serviceFileName}`,
+      });
+    });
+    this.openapi.paths.forEach((pathItem, path) => {
+      let formalizedPath = this.removeLastSegment(path);
+      let lastSegment = null;
+      // if (this.openapi.paths.contains(formalizedPath)) {
+      if (this.openapi.paths.has(formalizedPath)) {
+        // formalizedPath = path;
+        lastSegment = this.extractLastSegment(path);
+        console.log('path:', path);
+        console.log('formalizedPath:', formalizedPath);
+        console.log('lastSegment', lastSegment);
+      }
+      this.testPath(formalizedPath, pathItem, lastSegment);
+    });
+    this.controllersClasses.forEach(sourceFile => sourceFile.organizeImports().saveSync());
+    this.servicesClasses.forEach(sourceFile => sourceFile.organizeImports().saveSync());
+  }
+
+  public getOrCreateSourceFile(sourceFiles: Map<string, SourceFile>, path: string, template: string): SourceFile {
+    if (sourceFiles.has(path)) {
+      return sourceFiles.get(path);
+    }
+    const sourceFile = this.tsAstHelper.createSourceFile(`${this.outputPath}/${template}.ts`, '', {
+      overwrite: true,
+    });
+    sourceFiles.set(path, sourceFile);
+    return sourceFile;
+  }
+
+  public testPath(path: string, pathItem: PathItem, lastSegment?: string) {
+    console.log('path', path);
+    // const pathItem = this.openapi.paths[path];
+    const name = this.extractNameFromPath(path);
+    const nestPath = this.formatPath(path);
+    const serviceFile = this.getOrCreateSourceFile(this.servicesClasses, path, `services/${name}.interface`);
+    const controllerFile = this.getOrCreateSourceFile(this.controllersClasses, path, `controllers/${name}.controller`);
+    controllerFile.addImportDeclaration({
+      namedImports: ['Controller'],
+      moduleSpecifier: '@nestjs/common',
+    });
+    const controllerClassName = `${capitalize(name)}Controller`;
+    const serviceClassName = `${capitalize(name)}Service`;
+    const serviceName = camelcase(serviceClassName);
+    let controllerClass = controllerFile.getClass(controllerClassName);
+    if (controllerClass == null) {
+      controllerClass = controllerFile.addClass({
+        name: controllerClassName,
         isExported: true,
         decorators: [
           {
@@ -64,24 +130,21 @@ export class PathGenerator {
           },
         ],
       });
-      controllerFile.addImportDeclaration({
-        namedImports: [serviceClassName],
-        moduleSpecifier: `../${serviceFileName}`,
-      });
-      const serviceClass = serviceFile.addInterface({
+    }
+    let serviceClass = serviceFile.getInterface(serviceClassName);
+    if (serviceClass == null) {
+      serviceClass = serviceFile.addInterface({
         name: serviceClassName,
         isExported: true,
       });
-      this.operationGen.testOperation('get', pathItem.get, controllerClass, serviceClass);
-      this.operationGen.testOperation('put', pathItem.put, controllerClass, serviceClass);
-      this.operationGen.testOperation('post', pathItem.post, controllerClass, serviceClass);
-      this.operationGen.testOperation('delete', pathItem.delete, controllerClass, serviceClass);
-      this.operationGen.testOperation('options', pathItem.options, controllerClass, serviceClass);
-      this.operationGen.testOperation('head', pathItem.head, controllerClass, serviceClass);
-      this.operationGen.testOperation('patch', pathItem.patch, controllerClass, serviceClass);
-      this.operationGen.testOperation('trace', pathItem.trace, controllerClass, serviceClass);
-      controllerFile.organizeImports().saveSync();
-      serviceFile.organizeImports().saveSync();
-    });
+    }
+    this.operationGen.testOperation('get', pathItem.get, controllerClass, serviceClass, lastSegment);
+    this.operationGen.testOperation('put', pathItem.put, controllerClass, serviceClass, lastSegment);
+    this.operationGen.testOperation('post', pathItem.post, controllerClass, serviceClass, lastSegment);
+    this.operationGen.testOperation('delete', pathItem.delete, controllerClass, serviceClass, lastSegment);
+    this.operationGen.testOperation('options', pathItem.options, controllerClass, serviceClass, lastSegment);
+    this.operationGen.testOperation('head', pathItem.head, controllerClass, serviceClass, lastSegment);
+    this.operationGen.testOperation('patch', pathItem.patch, controllerClass, serviceClass, lastSegment);
+    this.operationGen.testOperation('trace', pathItem.trace, controllerClass, serviceClass, lastSegment);
   }
 }
