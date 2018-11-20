@@ -23,8 +23,4 @@ export class OpenAPI {
   tags: Tag[];
   @Type(() => ExternalDocumentation)
   externalDocs: ExternalDocumentation;
-
-  public isObject() {
-    console.log('openapi is object: ', this.openapi);
-  }
 }

@@ -26,7 +26,6 @@ export class OperationGenerator {
       return;
     }
     const methodName = operation.operationId || 'operation';
-    console.log('operation type', name);
     controllerClass.getSourceFile().addImportDeclaration({
       namedImports: [capitalize(name)],
       moduleSpecifier: '@nestjs/common',
@@ -38,7 +37,7 @@ export class OperationGenerator {
     }
     const decoratorArguments: string[] = [];
     if (lastSegment) {
-      decoratorArguments.push(`"${lastSegment}"`);
+      decoratorArguments.push(`'${lastSegment}'`);
     }
     const methodController = controllerClass.addMethod({
       name: methodName,

@@ -67,13 +67,8 @@ export class PathGenerator {
     this.openapi.paths.forEach((pathItem, path) => {
       let formalizedPath = this.removeLastSegment(path);
       let lastSegment = null;
-      // if (this.openapi.paths.contains(formalizedPath)) {
       if (this.openapi.paths.has(formalizedPath)) {
-        // formalizedPath = path;
         lastSegment = this.extractLastSegment(path);
-        console.log('path:', path);
-        console.log('formalizedPath:', formalizedPath);
-        console.log('lastSegment', lastSegment);
       }
       this.testPath(formalizedPath, pathItem, lastSegment);
     });
@@ -93,8 +88,6 @@ export class PathGenerator {
   }
 
   public testPath(path: string, pathItem: PathItem, lastSegment?: string) {
-    console.log('path', path);
-    // const pathItem = this.openapi.paths[path];
     const name = this.extractNameFromPath(path);
     const nestPath = this.formatPath(path);
     const serviceFile = this.getOrCreateSourceFile(this.servicesClasses, path, `services/${name}.interface`);
