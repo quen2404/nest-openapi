@@ -1,11 +1,5 @@
 import * as camelcase from 'camelcase';
-import TypeScriptAst, {
-  ClassDeclaration,
-  Scope,
-  SourceFile,
-  ClassDeclarationStructure,
-  InterfaceDeclaration,
-} from 'ts-simple-ast';
+import TypeScriptAst, { Scope, SourceFile } from 'ts-simple-ast';
 import { OpenAPI, PathItem } from '../model';
 import { capitalize } from '../utils';
 import { OperationGenerator } from './operation.generator';

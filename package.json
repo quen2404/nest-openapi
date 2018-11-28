@@ -7,14 +7,14 @@
     "lib": "lib"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "rimraf dist/ && tsc -p tsconfig.json",
     "format": "prettier lib/**/*.ts --write",
     "precommit": "lint-staged",
     "prepublish:next": "npm run build",
     "publish:next": "npm publish --access public --tag next",
     "prepublish:npm": "npm run build",
     "publish:npm": "npm publish --access public",
-    "test": "ts-node test/test.ts"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -34,11 +34,15 @@
     "@nestjs/common": "^5.4.0",
     "@nestjs/core": "^5.4.0",
     "@types/camelcase": "^4.1.0",
+    "@types/jest": "^23.3.9",
     "@types/js-yaml": "^3.11.2",
     "@types/node": "^10.12.10",
     "husky": "^1.2.0",
+    "jest": "^23.6.0",
     "lint-staged": "^8.1.0",
     "prettier": "^1.15.2",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^23.10.5",
     "ts-node": "^7.0.1",
     "typescript": "^3.1.6"
   },
