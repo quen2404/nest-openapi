@@ -1,6 +1,6 @@
 {
   "name": "nest-openapi",
-  "version": "1.0.0",
+  "version": "0.0.0-SNAPSHOT",
   "description": "OpenAPI middleware for NestJS",
   "main": "index.js",
   "directories": {

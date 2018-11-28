@@ -1,0 +1,66 @@
+version: 2
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:8.10
+
+jobs:
+  test:
+    <<: *defaults
+    docker:
+      - image: circleci/openjdk:8-jdk-node-browsers
+    steps:
+      - checkout
+      - restore_cache:
+        name: Restore NPM Package Cache
+        keys:
+          # when lock file changes, use increasingly general patterns to restore cache
+          - node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          - node-v1-{{ .Branch }}-
+          - node-v1-
+      - run:
+        name: Install Dependencies
+        command: npm install --frozen-lockfile
+      - save_cache:
+        name: Save NPM Package Cache
+        paths:
+          - ~/usr/local/lib/node_modules # location depends on npm version
+        key: node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+      - run:
+        name: Run tests
+        command: npm test
+      - store_test_results:
+          path: target/surefire-reports
+      - store_artifacts:
+          path: target/openapi-diff-*-SNAPSHOT.jar
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+      - run:
+          name: Publish package
+          command: npm publish
+workflows:
+  version: 2
+  test-deploy:
+    jobs:
+      - test:
+          filters:
+            tags:
+              only: /^v.*/
+      - deploy:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
