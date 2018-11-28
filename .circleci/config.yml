@@ -13,22 +13,22 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-        name: Restore NPM Package Cache
-        keys:
-          - 'node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}'
-          - node-v1-{{ .Branch }}-
-          - node-v1-
+          name: Restore NPM Package Cache
+          keys:
+            - 'node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}'
+            - node-v1-{{ .Branch }}-
+            - node-v1-
       - run:
-        name: Install Dependencies
-        command: npm install --frozen-lockfile
+          name: Install Dependencies
+          command: npm install --frozen-lockfile
       - save_cache:
-        name: Save NPM Package Cache
-        paths:
-          - ~/usr/local/lib/node_modules # location depends on npm version
-        key: node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
+          name: Save NPM Package Cache
+          paths:
+            - ~/usr/local/lib/node_modules # location depends on npm version
+          key: node-v1-{{ .Branch }}-{{ checksum "package-lock.json" }}
       - run:
-        name: Run tests
-        command: npm test
+          name: Run tests
+          command: npm test
       - store_test_results:
           path: target/surefire-reports
       - store_artifacts:
@@ -52,14 +52,14 @@ workflows:
   test-deploy:
     jobs:
       - test:
-          filters:
-            tags:
-              only: /^v.*/
+        filters:
+          tags:
+            only: /^v.*/
       - deploy:
-          requires:
-            - test
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
+        requires:
+          - test
+        filters:
+          tags:
+            only: /^v.*/
+          branches:
+            ignore: /.*/
