@@ -6,7 +6,9 @@ import { SecurityRequirement } from './security-requirement.model';
 import { Server } from './server.model';
 import { Type, Expose } from 'class-transformer';
 import { Response } from './response.model';
-export class Operation {
+import { SpecificationExtensions } from './extensions.model';
+
+export class Operation extends SpecificationExtensions {
   tags: string[];
   summary: string;
   description: string;

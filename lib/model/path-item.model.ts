@@ -2,7 +2,9 @@ import { Operation } from './operation.model';
 import { Server } from './server.model';
 import { Parameter } from './parameter.model';
 import { Type } from 'class-transformer';
-export class PathItem {
+import { SpecificationExtensions } from './extensions.model';
+
+export class PathItem extends SpecificationExtensions {
   $ref: string;
   summary: string;
   description: string;

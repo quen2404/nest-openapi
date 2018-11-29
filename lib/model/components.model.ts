@@ -8,7 +8,9 @@ import { SecurityScheme } from './security-scheme.model';
 import { Link } from './link.model';
 import { Callback } from './callback.model';
 import { Type } from 'class-transformer';
-export class Components {
+import { SpecificationExtensions } from './extensions.model';
+
+export class Components extends SpecificationExtensions {
   @Type(() => Schema)
   schemas: Map<string, Schema>;
   @Type(() => Response)

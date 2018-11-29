@@ -2,8 +2,9 @@ import { MediaType } from './media-type.model';
 import { Header } from './header.model';
 import { Link } from './link.model';
 import { Type } from 'class-transformer';
+import { SpecificationExtensions } from './extensions.model';
 
-export class Response {
+export class Response extends SpecificationExtensions {
   description: string;
   @Type(() => Header)
   headers: Map<string, Header>;

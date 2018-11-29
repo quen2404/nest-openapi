@@ -1,6 +1,7 @@
 import { Contact } from './contact.model';
 import { License } from './license.model';
-export class Info {
+import { SpecificationExtensions } from './extensions.model';
+export class Info extends SpecificationExtensions {
   title: string;
   description: string;
   termsOfService: string;

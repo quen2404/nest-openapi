@@ -2,8 +2,9 @@ import { Schema } from './schema.model';
 import { Example } from './example.model';
 import { MediaType } from './media-type.model';
 import { Type } from 'class-transformer';
+import { SpecificationExtensions } from './extensions.model';
 
-export class Parameter {
+export class Parameter extends SpecificationExtensions {
   name: string;
   in: In;
   description: string;

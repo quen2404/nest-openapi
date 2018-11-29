@@ -1,10 +1,10 @@
-import { Discriminator } from './discriminator.model';
-import { Xml } from './xml.model';
-import { ExternalDocumentation } from './external-doc.model';
 import { Type } from 'class-transformer';
-import { Reference } from './reference.model';
+import { Discriminator } from './discriminator.model';
+import { SpecificationExtensions } from './extensions.model';
+import { ExternalDocumentation } from './external-doc.model';
+import { Xml } from './xml.model';
 
-export class Schema extends Reference {
+export class Schema extends SpecificationExtensions {
   title: string;
   multipleOf: number;
   maximum?: number;

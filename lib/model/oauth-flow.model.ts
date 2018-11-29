@@ -1,4 +1,6 @@
-export class OAuthFlow {
+import { SpecificationExtensions } from './extensions.model';
+
+export class OAuthFlow extends SpecificationExtensions {
   authorizationUrl: string;
   tokenUrl: string;
   refreshUrl: string;

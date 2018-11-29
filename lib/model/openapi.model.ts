@@ -4,10 +4,11 @@ import { SecurityRequirement } from './security-requirement.model';
 import { Tag } from './tag.model';
 import { ExternalDocumentation } from './external-doc.model';
 import { Components } from './components.model';
-import { Type } from 'class-transformer';
+import { Type, Expose } from 'class-transformer';
 import { PathItem } from './path-item.model';
+import { SpecificationExtensions } from './extensions.model';
 
-export class OpenAPI {
+export class OpenAPI extends SpecificationExtensions {
   openapi: string;
   @Type(() => Info)
   info: Info;
