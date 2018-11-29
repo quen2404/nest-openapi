@@ -6,6 +6,7 @@ import { PathGenerator } from './path.generator';
 import { RequestBodyGenerator } from './request-body.generator';
 import { ResponseGenerator } from './response.generator';
 import { SchemaGenerator } from './schema.generator';
+import { ModuleGenerator } from './module.generator';
 
 export class Generator {
   private mediaTypeGen: MediaTypeGenerator;
@@ -15,6 +16,7 @@ export class Generator {
   private requestBodyGen: RequestBodyGenerator;
   private responseGen: ResponseGenerator;
   private schemaGen: SchemaGenerator;
+  private moduleGen: ModuleGenerator;
 
   constructor(private outputPath: string, private openapi: OpenAPI) {
     this.schemaGen = new SchemaGenerator(outputPath, openapi);
@@ -30,10 +32,12 @@ export class Generator {
       this.responseGen,
     );
     this.pathGen = new PathGenerator(outputPath, openapi, this.operationGen);
+    this.moduleGen = new ModuleGenerator(outputPath);
   }
 
   public generate() {
     this.pathGen.testPaths();
     this.schemaGen.testSchemas();
+    this.moduleGen.generate();
   }
 }
