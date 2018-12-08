@@ -16,4 +16,6 @@ $ npm install nest-openapi
 
 ## Usage
 
+```typescript
 
+```
