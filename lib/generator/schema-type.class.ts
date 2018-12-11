@@ -1,7 +1,12 @@
 import { ImportDeclarationStructure } from 'ts-simple-ast';
 
 export class SchemaType {
-  constructor(public name: string, public module?: string, public isArray?: boolean) {
+  constructor(
+    public name: string,
+    public module?: string,
+    public isArray?: boolean,
+    public bundle: BundleType = BundleType.PROMISE,
+  ) {
     if (isArray == null) {
       this.isArray = false;
     }
@@ -16,7 +21,7 @@ export class SchemaType {
   }
 
   get promisifyName(): string {
-    return `Promise<${this.name}>`;
+    return `${this.bundle}<${this.name}>`;
   }
 
   get needImport(): boolean {
@@ -37,3 +42,8 @@ export class SchemaType {
 export const TYPE_ANY = new SchemaType('any');
 export const TYPE_NEVER = new SchemaType('never');
 export const TYPE_VOID = new SchemaType('void');
+
+export enum BundleType {
+  PROMISE = 'Promise',
+  Observable = 'Observable',
+}
