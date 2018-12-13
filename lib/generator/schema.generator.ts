@@ -12,10 +12,10 @@ export class SchemaGenerator {
   constructor(private outputPath: string, private openapi: OpenAPI) {}
 
   testSchemas() {
-    this.openapi.components.schemas.forEach((schema, name) => this.testSchema(name, schema));
+    this.openapi.components.schemas.forEach(async (schema, name) => await this.testSchema(name, schema));
   }
 
-  testSchema(name: string, schema: Schema) {
+  async testSchema(name: string, schema: Schema) {
     const tsAstHelper = new TypeScriptAst();
     const schemaType = this.getSchemaTypeFromName(name);
     const tsFile: SourceFile = tsAstHelper.createSourceFile(`${this.outputPath}/${schemaType.file}`, '', {
@@ -39,7 +39,7 @@ export class SchemaGenerator {
         }
       });
     }
-    tsFile.organizeImports().saveSync();
+    await tsFile.organizeImports().save();
   }
 
   addValidatorImport(name: string): ImportDeclarationStructure {

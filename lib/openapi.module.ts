@@ -1,13 +1,22 @@
-import { OnModuleInit, DynamicModule, Provider } from '@nestjs/common';
+import { OnModuleInit, DynamicModule, Provider, Module, Inject } from '@nestjs/common';
 import { OpenAPIModuleOptions, OpenAPIModuleAsyncOptions, OpenAPIOptionsFactory } from './interfaces';
 import { OPENAPI_MODULE_OPTIONS, OPENAPI_MODULE_ID } from './openapi.constants';
 import { generateString } from './utils';
+import { OpenAPIExplorer } from './openapi.explorer';
+import { OpenAPIFactory } from './openapi.factory';
 
+@Module({
+  providers: [OpenAPIFactory, OpenAPIExplorer],
+  exports: [OpenAPIExplorer],
+})
 export class OpenAPIModule implements OnModuleInit {
-  constructor() {}
+  constructor(
+    @Inject(OPENAPI_MODULE_OPTIONS) private readonly options: OpenAPIModuleOptions,
+    private readonly openapiFactory: OpenAPIFactory,
+  ) {}
 
-  onModuleInit() {
-    throw new Error('Method not implemented.');
+  async onModuleInit() {
+    await this.openapiFactory.generate(this.options);
   }
 
   static forRoot(options: OpenAPIModuleOptions = {}): DynamicModule {

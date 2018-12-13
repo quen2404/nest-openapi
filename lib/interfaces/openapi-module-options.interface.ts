@@ -2,8 +2,11 @@ import { Type } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces';
 
 export interface OpenAPIModuleOptions {
-  source?: string;
-  output?: string;
+  sourcePath?: string;
+  outputPath?: string;
+  controller?: {
+    responseBundle: 'Promise' | 'Observable';
+  };
 }
 
 export interface OpenAPIModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {

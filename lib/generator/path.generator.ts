@@ -66,8 +66,8 @@ export class PathGenerator {
       }
       this.testPath(formalizedPath, pathItem, lastSegment);
     });
-    this.controllersClasses.forEach(sourceFile => sourceFile.organizeImports().saveSync());
-    this.servicesClasses.forEach(sourceFile => sourceFile.organizeImports().saveSync());
+    this.controllersClasses.forEach(async sourceFile => await sourceFile.organizeImports().save());
+    this.servicesClasses.forEach(async sourceFile => await sourceFile.organizeImports().save());
   }
 
   public getOrCreateSourceFile(sourceFiles: Map<string, SourceFile>, path: string, template: string): SourceFile {

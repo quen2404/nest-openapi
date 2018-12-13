@@ -1,5 +1,10 @@
 import { ImportDeclarationStructure } from 'ts-simple-ast';
 
+export enum BundleType {
+  PROMISE = 'Promise',
+  Observable = 'Observable',
+}
+
 export class SchemaType {
   constructor(
     public name: string,
@@ -42,8 +47,3 @@ export class SchemaType {
 export const TYPE_ANY = new SchemaType('any');
 export const TYPE_NEVER = new SchemaType('never');
 export const TYPE_VOID = new SchemaType('void');
-
-export enum BundleType {
-  PROMISE = 'Promise',
-  Observable = 'Observable',
-}
