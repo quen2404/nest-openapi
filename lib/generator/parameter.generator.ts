@@ -31,8 +31,8 @@ export class ParameterGenerator {
     });
     const schemaType = this.schemaGen.getSchemaType(parameter.schema);
     if (schemaType.needImport) {
-      methodController.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
-      methodService.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
+      methodController.getSourceFile().addImportDeclarations(schemaType.getImportDeclarations());
+      methodService.getSourceFile().addImportDeclarations(schemaType.getImportDeclarations());
     }
     methodController.addParameter({
       name: parameter.name,

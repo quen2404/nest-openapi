@@ -32,8 +32,8 @@ export class OperationGenerator {
     });
     const responseType = this.responseGen.getTypeFromResponses(operation.responses);
     if (responseType.needImport) {
-      controllerClass.getSourceFile().addImportDeclaration(responseType.getImportDeclaration());
-      serviceClass.getSourceFile().addImportDeclaration(responseType.getImportDeclaration());
+      controllerClass.getSourceFile().addImportDeclarations(responseType.getImportDeclarations());
+      serviceClass.getSourceFile().addImportDeclarations(responseType.getImportDeclarations());
     }
     const decoratorArguments: string[] = [];
     if (lastSegment) {
@@ -48,11 +48,11 @@ export class OperationGenerator {
         },
       ],
       isAsync: true,
-      returnType: responseType.promisifyName,
+      returnType: responseType.asBundle,
     });
     const methodService = serviceClass.addMethod({
       name: methodName,
-      returnType: responseType.promisifyName,
+      returnType: responseType.asBundle,
     });
     operation.parameters.forEach((parameter: Parameter) => {
       this.parameterGen.testParameter(parameter, methodController, methodService);

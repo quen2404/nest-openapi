@@ -18,8 +18,8 @@ export class RequestBodyGenerator {
       moduleSpecifier: '@nestjs/common',
     });
     if (schemaType.needImport) {
-      methodController.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
-      methodService.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
+      methodController.getSourceFile().addImportDeclarations(schemaType.getImportDeclarations());
+      methodService.getSourceFile().addImportDeclarations(schemaType.getImportDeclarations());
     }
     methodController.addParameter({
       name: 'body',

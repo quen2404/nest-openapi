@@ -33,7 +33,7 @@ export class SchemaGenerator {
           schemaClass
             .setExtends(subSchemaType.name)
             .getSourceFile()
-            .addImportDeclaration(subSchemaType.getImportDeclaration());
+            .addImportDeclarations(subSchemaType.getImportDeclarations());
         } else {
           this.generateProperties(schemaClass, subSchema.properties);
         }
