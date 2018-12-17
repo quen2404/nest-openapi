@@ -12,14 +12,14 @@ export class RequestBodyGenerator {
     if (!requestBody || !requestBody.content || !requestBody.content.get('application/json')) {
       return;
     }
-    const schemaType = this.mediaTypeGen.getTypeFromMediaType(requestBody.content.get('application/json'));
+    const schemaType = this.mediaTypeGen.getSchemaType(requestBody.content.get('application/json'));
     methodController.getSourceFile().addImportDeclaration({
       namedImports: ['Body'],
       moduleSpecifier: '@nestjs/common',
     });
     if (schemaType.needImport) {
-      methodController.getSourceFile().addImportDeclarations(schemaType.getImportDeclarations());
-      methodService.getSourceFile().addImportDeclarations(schemaType.getImportDeclarations());
+      methodController.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
+      methodService.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
     }
     methodController.addParameter({
       name: 'body',

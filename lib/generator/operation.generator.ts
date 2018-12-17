@@ -31,10 +31,8 @@ export class OperationGenerator {
       moduleSpecifier: '@nestjs/common',
     });
     const responseType = this.responseGen.getTypeFromResponses(operation.responses);
-    if (responseType.needImport) {
-      controllerClass.getSourceFile().addImportDeclarations(responseType.getImportDeclarations());
-      serviceClass.getSourceFile().addImportDeclarations(responseType.getImportDeclarations());
-    }
+    controllerClass.getSourceFile().addImportDeclarations(responseType.getImportDeclarations());
+    serviceClass.getSourceFile().addImportDeclarations(responseType.getImportDeclarations());
     const decoratorArguments: string[] = [];
     if (lastSegment) {
       decoratorArguments.push(`'${lastSegment}'`);
@@ -48,11 +46,11 @@ export class OperationGenerator {
         },
       ],
       isAsync: true,
-      returnType: responseType.asBundle,
+      returnType: responseType.type,
     });
     const methodService = serviceClass.addMethod({
       name: methodName,
-      returnType: responseType.asBundle,
+      returnType: responseType.type,
     });
     operation.parameters.forEach((parameter: Parameter) => {
       this.parameterGen.testParameter(parameter, methodController, methodService);
