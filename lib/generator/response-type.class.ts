@@ -25,7 +25,10 @@ export class ResponseType {
   }
 
   getImportDeclarations(): ImportDeclarationStructure[] {
-    const declarations: ImportDeclarationStructure[] = [this.schema.getImportDeclaration()];
+    const declarations: ImportDeclarationStructure[] = [];
+    if (this.schema.needImport) {
+      declarations.push(this.schema.getImportDeclaration());
+    }
     if (this.responseContainer) {
       declarations.push({
         moduleSpecifier: `nest-openapi`,
