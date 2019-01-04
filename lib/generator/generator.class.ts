@@ -6,6 +6,8 @@ import { PathGenerator } from './path.generator';
 import { RequestBodyGenerator } from './request-body.generator';
 import { ResponseGenerator } from './response.generator';
 import { SchemaGenerator } from './schema.generator';
+import { ModuleGenerator } from './module.generator';
+import { GeneratorOptions } from './generator-options.interface';
 
 export class Generator {
   private mediaTypeGen: MediaTypeGenerator;
@@ -15,25 +17,28 @@ export class Generator {
   private requestBodyGen: RequestBodyGenerator;
   private responseGen: ResponseGenerator;
   private schemaGen: SchemaGenerator;
+  private moduleGen: ModuleGenerator;
 
-  constructor(private outputPath: string, private openapi: OpenAPI) {
-    this.schemaGen = new SchemaGenerator(outputPath, openapi);
-    this.mediaTypeGen = new MediaTypeGenerator(outputPath, openapi, this.schemaGen);
-    this.parameterGen = new ParameterGenerator(outputPath, openapi, this.schemaGen);
-    this.requestBodyGen = new RequestBodyGenerator(outputPath, openapi, this.mediaTypeGen);
-    this.responseGen = new ResponseGenerator(outputPath, openapi, this.mediaTypeGen);
+  constructor(private options: GeneratorOptions, private openapi: OpenAPI) {
+    this.schemaGen = new SchemaGenerator(options, openapi);
+    this.mediaTypeGen = new MediaTypeGenerator(options, openapi, this.schemaGen);
+    this.parameterGen = new ParameterGenerator(options, openapi, this.schemaGen);
+    this.requestBodyGen = new RequestBodyGenerator(options, openapi, this.mediaTypeGen);
+    this.responseGen = new ResponseGenerator(options, openapi, this.mediaTypeGen);
     this.operationGen = new OperationGenerator(
-      outputPath,
+      options,
       openapi,
       this.parameterGen,
       this.requestBodyGen,
       this.responseGen,
     );
-    this.pathGen = new PathGenerator(outputPath, openapi, this.operationGen);
+    this.pathGen = new PathGenerator(options, openapi, this.operationGen);
+    this.moduleGen = new ModuleGenerator(options);
   }
 
   public generate() {
     this.pathGen.testPaths();
     this.schemaGen.testSchemas();
+    this.moduleGen.generate();
   }
 }

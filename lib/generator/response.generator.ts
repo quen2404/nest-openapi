@@ -2,9 +2,14 @@ import { OpenAPI, Response } from '../model';
 import { MediaTypeGenerator } from './media-type.generator';
 import { TYPE_ANY, TYPE_VOID } from './schema-type.class';
 import { ResponseType } from './response-type.class';
+import { GeneratorOptions } from './generator-options.interface';
 
 export class ResponseGenerator {
-  public constructor(private outputPath: string, private openapi: OpenAPI, private mediaTypeGen: MediaTypeGenerator) {}
+  public constructor(
+    private options: GeneratorOptions,
+    private openapi: OpenAPI,
+    private mediaTypeGen: MediaTypeGenerator,
+  ) {}
   public getTypeFromResponses(responses: Map<string, Response>): ResponseType {
     // TODO
     const count = responses.size - (responses.has('default') ? 1 : 0);

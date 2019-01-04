@@ -7,9 +7,9 @@ export class OpenAPIFactory {
   constructor(private readonly openapiExplorer: OpenAPIExplorer) {}
 
   async generate(options: OpenAPIModuleOptions) {
-    if (!options.sourcePath || !options.outputPath) {
+    if (!options.sourcePath || !options.output || !options.output.path) {
       return;
     }
-    this.openapiExplorer.explore(options.sourcePath, options.outputPath);
+    this.openapiExplorer.explore(options);
   }
 }

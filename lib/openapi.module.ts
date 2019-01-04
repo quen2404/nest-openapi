@@ -19,7 +19,7 @@ export class OpenAPIModule implements OnModuleInit {
     await this.openapiFactory.generate(this.options);
   }
 
-  static forRoot(options: OpenAPIModuleOptions = {}): DynamicModule {
+  static forRoot(options: OpenAPIModuleOptions): DynamicModule {
     return {
       module: OpenAPIModule,
       providers: [

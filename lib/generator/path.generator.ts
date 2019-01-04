@@ -3,15 +3,14 @@ import TypeScriptAst, { Scope, SourceFile } from 'ts-simple-ast';
 import { OpenAPI, PathItem } from '../model';
 import { capitalize } from '../utils';
 import { OperationGenerator } from './operation.generator';
+import { GeneratorOptions } from './generator-options.interface';
 
 export class PathGenerator {
   private tsAstHelper = new TypeScriptAst();
   private controllersClasses = new Map<string, SourceFile>();
   private servicesClasses = new Map<string, SourceFile>();
 
-  constructor(private outputPath: string, private openapi: OpenAPI, private operationGen: OperationGenerator) {
-    this.tsAstHelper = new TypeScriptAst();
-  }
+  constructor(private options: GeneratorOptions, private openapi: OpenAPI, private operationGen: OperationGenerator) {}
 
   public extractNameFromPath(path: string): string {
     const re = /[\/\{\}]/gi;
@@ -74,7 +73,7 @@ export class PathGenerator {
     if (sourceFiles.has(path)) {
       return sourceFiles.get(path);
     }
-    const sourceFile = this.tsAstHelper.createSourceFile(`${this.outputPath}/${template}.ts`, '', {
+    const sourceFile = this.tsAstHelper.createSourceFile(`${this.options.outputPath}/${template}.ts`, '', {
       overwrite: true,
     });
     sourceFiles.set(path, sourceFile);

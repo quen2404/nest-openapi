@@ -5,10 +5,11 @@ import { capitalize } from '../utils';
 import { ParameterGenerator } from './parameter.generator';
 import { RequestBodyGenerator } from './request-body.generator';
 import { ResponseGenerator } from './response.generator';
+import { GeneratorOptions } from './generator-options.interface';
 
 export class OperationGenerator {
   constructor(
-    private outputPath: string,
+    private options: GeneratorOptions,
     private openapi: OpenAPI,
     private parameterGen: ParameterGenerator,
     private requestBodyGen: RequestBodyGenerator,

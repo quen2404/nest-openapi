@@ -7,9 +7,10 @@ import TypeScriptAst, {
 import { DataType, OpenAPI, Schema } from '../model';
 import { camelToKebab } from '../utils';
 import { SchemaType } from './schema-type.class';
+import { GeneratorOptions } from './generator-options.interface';
 
 export class SchemaGenerator {
-  constructor(private outputPath: string, private openapi: OpenAPI) {}
+  constructor(private options: GeneratorOptions, private openapi: OpenAPI) {}
 
   testSchemas() {
     this.openapi.components.schemas.forEach(async (schema, name) => await this.testSchema(name, schema));
@@ -18,7 +19,7 @@ export class SchemaGenerator {
   async testSchema(name: string, schema: Schema) {
     const tsAstHelper = new TypeScriptAst();
     const schemaType = this.getSchemaTypeFromName(name);
-    const tsFile: SourceFile = tsAstHelper.createSourceFile(`${this.outputPath}/${schemaType.file}`, '', {
+    const tsFile: SourceFile = tsAstHelper.createSourceFile(`${this.options.outputPath}/${schemaType.file}`, '', {
       overwrite: true,
     });
     const schemaClass = tsFile.addClass({

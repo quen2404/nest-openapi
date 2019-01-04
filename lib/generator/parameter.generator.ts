@@ -2,9 +2,10 @@ import * as camelcase from 'camelcase';
 import { MethodDeclaration, MethodSignature } from 'ts-simple-ast';
 import { In, OpenAPI, Parameter } from '../model';
 import { SchemaGenerator } from './schema.generator';
+import { GeneratorOptions } from './generator-options.interface';
 
 export class ParameterGenerator {
-  public constructor(private outputPath: string, private openapi: OpenAPI, private schemaGen: SchemaGenerator) {}
+  public constructor(private options: GeneratorOptions, private openapi: OpenAPI, private schemaGen: SchemaGenerator) {}
   public getParameterDecorator(parameter: Parameter): string {
     switch (parameter.in) {
       case In.PATH:

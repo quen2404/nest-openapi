@@ -1,9 +1,14 @@
 import { MethodDeclaration, MethodSignature } from 'ts-simple-ast';
 import { OpenAPI, RequestBody } from '../model';
 import { MediaTypeGenerator } from './media-type.generator';
+import { GeneratorOptions } from './generator-options.interface';
 
 export class RequestBodyGenerator {
-  public constructor(private outputPath: string, private openapi: OpenAPI, private mediaTypeGen: MediaTypeGenerator) {}
+  public constructor(
+    private options: GeneratorOptions,
+    private openapi: OpenAPI,
+    private mediaTypeGen: MediaTypeGenerator,
+  ) {}
   public testRequestBody(
     requestBody: RequestBody,
     methodController: MethodDeclaration,
