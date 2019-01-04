@@ -6,3 +6,4 @@ export * from './request-body.generator';
 export * from './response.generator';
 export * from './schema-type.class';
 export * from './schema.generator';
+export * from './module.generator';
