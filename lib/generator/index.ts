@@ -7,3 +7,4 @@ export * from './response.generator';
 export * from './schema-type.class';
 export * from './schema.generator';
 export * from './module.generator';
+export * from './index.generator';

@@ -1,15 +1,15 @@
 import * as camelcase from 'camelcase';
 import TypeScriptAst from 'ts-simple-ast';
 import { GeneratorOptions } from './generator-options.interface';
-import { capitalize, camelToKebab, removeEnds } from '../utils';
+import { capitalize, camelToKebab, removeEnd } from '../utils';
 
 export class ModuleGenerator {
   private tsAstHelper = new TypeScriptAst();
 
   public constructor(private options: GeneratorOptions) {}
 
-  public generate() {
-    const camelName = removeEnds(camelcase(this.options.moduleName), 'Module');
+  public async generate() {
+    const camelName = removeEnd(camelcase(this.options.moduleName), 'Module');
     const moduleFile = this.tsAstHelper.createSourceFile(
       `${this.options.outputPath}/${camelToKebab(camelName)}.module.ts`,
       '',
@@ -37,6 +37,6 @@ providers: [],
         },
       ],
     });
-    moduleFile.organizeImports().saveSync();
+    return await moduleFile.organizeImports().save();
   }
 }

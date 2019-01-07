@@ -12,7 +12,7 @@ import { GeneratorOptions } from './generator-options.interface';
 export class SchemaGenerator {
   constructor(private options: GeneratorOptions, private openapi: OpenAPI) {}
 
-  testSchemas() {
+  async testSchemas() {
     this.openapi.components.schemas.forEach(async (schema, name) => await this.testSchema(name, schema));
   }
 

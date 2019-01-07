@@ -8,6 +8,7 @@ import { ResponseGenerator } from './response.generator';
 import { SchemaGenerator } from './schema.generator';
 import { ModuleGenerator } from './module.generator';
 import { GeneratorOptions } from './generator-options.interface';
+import { IndexGenerator } from './index.generator';
 
 export class Generator {
   private mediaTypeGen: MediaTypeGenerator;
@@ -18,6 +19,7 @@ export class Generator {
   private responseGen: ResponseGenerator;
   private schemaGen: SchemaGenerator;
   private moduleGen: ModuleGenerator;
+  private indexGen: IndexGenerator;
 
   constructor(private options: GeneratorOptions, private openapi: OpenAPI) {
     this.schemaGen = new SchemaGenerator(options, openapi);
@@ -34,11 +36,13 @@ export class Generator {
     );
     this.pathGen = new PathGenerator(options, openapi, this.operationGen);
     this.moduleGen = new ModuleGenerator(options);
+    this.indexGen = new IndexGenerator(options);
   }
 
-  public generate() {
-    this.pathGen.testPaths();
-    this.schemaGen.testSchemas();
-    this.moduleGen.generate();
+  public async generate() {
+    await this.pathGen.testPaths();
+    await this.schemaGen.testSchemas();
+    await this.moduleGen.generate();
+    await this.indexGen.generate();
   }
 }

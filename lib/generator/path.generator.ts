@@ -36,7 +36,7 @@ export class PathGenerator {
     return null;
   }
 
-  public testPaths() {
+  public async testPaths() {
     this.openapi.paths.forEach((pathItem, path) => {
       const name = this.extractNameFromPath(path);
       const formalizedPath = this.removeLastSegment(path);
