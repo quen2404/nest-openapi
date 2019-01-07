@@ -10,7 +10,6 @@
   "scripts": {
     "build": "rimraf dist/ && tsc -p tsconfig.json",
     "format": "prettier lib/**/*.ts --write",
-    "precommit": "lint-staged",
     "prepublish:next": "npm run build",
     "publish:next": "npm publish --access public --tag next",
     "prepublish:npm": "npm run build",
@@ -66,5 +65,10 @@
     "js-yaml": "^3.12.1",
     "reflect-metadata": "^0.1.12",
     "ts-simple-ast": "^20.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }
