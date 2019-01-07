@@ -1,10 +1,7 @@
 import { Project, ExportDeclarationStructure } from 'ts-simple-ast';
 import { GeneratorOptions } from './generator-options.interface';
-import * as readdir from 'recursive-readdir';
-import * as fs from 'fs';
 import * as path from 'path';
 import { removeEnd } from '../utils';
-import { map } from 'rxjs/operators';
 
 export class IndexGenerator {
   public constructor(private options: GeneratorOptions) {}
@@ -44,35 +41,6 @@ export class IndexGenerator {
       overwrite: true,
     });
     indexFile.addExportDeclarations(exports);
-    /*
-    const files: string[] = await readdir(this.options.outputPath, [
-      (file: string, stats: fs.Stats): boolean => {
-        console.log('filtering file', file);
-        if (!file.endsWith('.ts')) {
-          return !stats.isDirectory();
-        }
-        return false;
-      },
-    ]);
-    files
-      .map(file => {
-        console.log('processing file:', file);
-        const sourceFile = this.tsAstHelper.getSourceFile(file);
-        return {
-          path: removeEnd(path.relative(this.options.outputPath, file), '.ts'),
-          exports: sourceFile.getExportDeclarations(),
-        };
-      })
-      .filter(file => file.path !== 'index')
-      .forEach(file => {
-        console.log('file:', file);
-        try {
-          indexFile;
-          indexFile.addExportDeclarations(file.exports.map(namedExport => namedExport.getStructure()));
-        } catch (error) {
-          console.error(error);
-        }
-      });*/
     return await indexFile.save();
   }
 }
