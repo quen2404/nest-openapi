@@ -50,7 +50,7 @@ export class PathGenerator {
         formalizedPath,
         `controllers/${name}.controller`,
       );
-      const serviceClassName = `${capitalize(name)}Service`;
+      const serviceClassName = `I${capitalize(name)}Service`;
       const serviceFileName = `services/${name}.interface`;
       controllerFile.addImportDeclaration({
         namedImports: [serviceClassName],
@@ -86,12 +86,12 @@ export class PathGenerator {
     const serviceFile = this.getOrCreateSourceFile(this.servicesClasses, path, `services/${name}.interface`);
     const controllerFile = this.getOrCreateSourceFile(this.controllersClasses, path, `controllers/${name}.controller`);
     controllerFile.addImportDeclaration({
-      namedImports: ['Controller'],
+      namedImports: ['Controller', 'Inject'],
       moduleSpecifier: '@nestjs/common',
     });
     const controllerClassName = `${capitalize(name)}Controller`;
-    const serviceClassName = `${capitalize(name)}Service`;
-    const serviceName = camelcase(serviceClassName);
+    const serviceName = `${capitalize(name)}Service`;
+    const serviceClassName = `I${serviceName}`;
     let controllerClass = controllerFile.getClass(controllerClassName);
     if (controllerClass == null) {
       controllerClass = controllerFile.addClass({
@@ -107,10 +107,16 @@ export class PathGenerator {
           {
             parameters: [
               {
-                name: serviceName,
+                name: camelcase(serviceName),
                 type: serviceClassName,
                 isReadonly: true,
                 scope: Scope.Private,
+                decorators: [
+                  {
+                    name: 'Inject',
+                    arguments: [`'${serviceName}'`],
+                  },
+                ],
               },
             ],
           },

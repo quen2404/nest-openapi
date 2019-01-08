@@ -62,7 +62,11 @@ export class OperationGenerator {
         .getParameters()
         .map(param => param.getName())
         .join(', ');
-      write.write(`return await this.${camelcase(serviceClass.getName())}.${methodName}(${parameters});`);
+      const serviceVariableName = controllerClass
+        .getConstructors()[0]
+        .getParameters()[0]
+        .getName();
+      write.write(`return await this.${serviceVariableName}.${methodName}(${parameters});`);
     });
   }
 }
