@@ -22,7 +22,7 @@ export class ParameterGenerator {
   public testParameter(parameter: Parameter, methodController: MethodDeclaration, methodService: MethodSignature) {
     const camelName = camelcase(parameter.name);
     const decoratorName = this.getParameterDecorator(parameter);
-    const decoratorArgs = [];
+    const decoratorArgs = [`'${parameter.name}'`];
     if (camelName !== parameter.name) {
       decoratorArgs.push(parameter.name);
     }
