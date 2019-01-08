@@ -28,6 +28,11 @@ export class ModuleGenerator {
         moduleSpecifier: relativizeImport(this.options.outputPath, controller.path),
       })),
     );
+    const kebabModuleName = camelToKebab(removeEnd(this.implementationModuleName, 'Module'));
+    moduleFile.addImportDeclaration({
+      namedImports: [this.implementationModuleName],
+      moduleSpecifier: `../${kebabModuleName}/${kebabModuleName}.module`,
+    });
     moduleFile.addClass({
       name: `${capitalize(camelName)}Module`,
       isExported: true,
@@ -44,9 +49,13 @@ export class ModuleGenerator {
   public getModuleDecoratorBody(controllers: ControllerInterface[]) {
     const controllersValue = controllers.map(controller => controller.className).join(',');
     return `{
-      imports: [],
+      imports: [${this.implementationModuleName}],
       controllers: [${controllersValue}],
       providers: [],
       }`;
+  }
+
+  public get implementationModuleName() {
+    return capitalize(camelcase(`${this.options.moduleName}ImplModule`));
   }
 }
