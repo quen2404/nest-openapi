@@ -1,7 +1,6 @@
 import { Project, ExportDeclarationStructure } from 'ts-simple-ast';
 import { GeneratorOptions } from './generator-options.interface';
-import * as path from 'path';
-import { removeEnd } from '../utils';
+import { relativizeImport } from '../utils';
 
 export class IndexGenerator {
   public constructor(private options: GeneratorOptions) {}
@@ -14,8 +13,8 @@ export class IndexGenerator {
     project
       .getSourceFiles()
       .map(sourceFile => {
-        const importPath = removeEnd(path.relative(this.options.outputPath, sourceFile.getFilePath()), '.ts');
-        if (importPath != 'index') {
+        const importPath = relativizeImport(this.options.outputPath, sourceFile.getFilePath());
+        if (importPath != './index') {
           const names: string[] = [];
           sourceFile
             .getExportedDeclarations()
@@ -29,7 +28,7 @@ export class IndexGenerator {
             .forEach(name => names.push(name));
           return {
             namedExports: names,
-            moduleSpecifier: `./${importPath}`,
+            moduleSpecifier: importPath,
           };
         }
         return null;

@@ -40,9 +40,9 @@ export class Generator {
   }
 
   public async generate() {
-    await this.pathGen.testPaths();
+    const controllers = await this.pathGen.testPaths();
     await this.schemaGen.testSchemas();
-    await this.moduleGen.generate();
+    await this.moduleGen.generate(controllers);
     await this.indexGen.generate();
   }
 }

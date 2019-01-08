@@ -4,6 +4,7 @@ import { OpenAPI, PathItem } from '../model';
 import { capitalize } from '../utils';
 import { OperationGenerator } from './operation.generator';
 import { GeneratorOptions } from './generator-options.interface';
+import { ControllerInterface } from './controller.interface';
 
 export class PathGenerator {
   private tsAstHelper = new TypeScriptAst();
@@ -36,7 +37,7 @@ export class PathGenerator {
     return null;
   }
 
-  public async testPaths() {
+  public async testPaths(): Promise<ControllerInterface[]> {
     this.openapi.paths.forEach((pathItem, path) => {
       const name = this.extractNameFromPath(path);
       const formalizedPath = this.removeLastSegment(path);
@@ -67,6 +68,14 @@ export class PathGenerator {
     });
     this.controllersClasses.forEach(async sourceFile => await sourceFile.organizeImports().save());
     this.servicesClasses.forEach(async sourceFile => await sourceFile.organizeImports().save());
+    const controllerClassNames: ControllerInterface[] = [];
+    this.controllersClasses.forEach(source =>
+      controllerClassNames.push({
+        className: source.getClasses()[0].getName(),
+        path: source.getFilePath(),
+      }),
+    );
+    return controllerClassNames;
   }
 
   public getOrCreateSourceFile(sourceFiles: Map<string, SourceFile>, path: string, template: string): SourceFile {
