@@ -49,6 +49,10 @@ export class OperationGenerator {
       isAsync: true,
       returnType: responseType.type,
     });
+    const doc = this.generateDoc(operation);
+    if (doc != null) {
+      methodController.addJsDoc(doc);
+    }
     const methodService = serviceClass.addMethod({
       name: methodName,
       returnType: responseType.type,
@@ -68,5 +72,22 @@ export class OperationGenerator {
         .getName();
       write.write(`return await this.${serviceVariableName}.${methodName}(${parameters});`);
     });
+  }
+
+  generateDoc(operation: Operation): string | null {
+    const result: string[] = [];
+    if (operation.deprecated) {
+      result.push('@deprecated');
+    }
+    if (operation.summary != null) {
+      result.push(operation.summary);
+    }
+    if (operation.description != null && operation.description.trim() !== '') {
+      result.push('', operation.description);
+    }
+    if (result.length == 0) {
+      return null;
+    }
+    return result.join('\n');
   }
 }

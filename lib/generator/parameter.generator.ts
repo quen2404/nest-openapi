@@ -11,7 +11,7 @@ export class ParameterGenerator {
       case In.PATH:
         return 'Param';
       case In.HEADER:
-        return 'Header';
+        return 'Headers';
       case In.QUERY:
         return 'Query';
       default:
@@ -20,12 +20,8 @@ export class ParameterGenerator {
   }
 
   public testParameter(parameter: Parameter, methodController: MethodDeclaration, methodService: MethodSignature) {
-    const camelName = camelcase(parameter.name);
     const decoratorName = this.getParameterDecorator(parameter);
     const decoratorArgs = [`'${parameter.name}'`];
-    if (camelName !== parameter.name) {
-      decoratorArgs.push(parameter.name);
-    }
     methodController.getSourceFile().addImportDeclaration({
       namedImports: [decoratorName],
       moduleSpecifier: '@nestjs/common',
@@ -36,7 +32,7 @@ export class ParameterGenerator {
       methodService.getSourceFile().addImportDeclaration(schemaType.getImportDeclaration());
     }
     methodController.addParameter({
-      name: parameter.name,
+      name: camelcase(parameter.name),
       decorators: [
         {
           name: decoratorName,

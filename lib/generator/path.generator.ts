@@ -1,7 +1,7 @@
 import * as camelcase from 'camelcase';
 import TypeScriptAst, { Scope, SourceFile } from 'ts-simple-ast';
 import { OpenAPI, PathItem } from '../model';
-import { capitalize } from '../utils';
+import { capitalize, camelToKebab } from '../utils';
 import { OperationGenerator } from './operation.generator';
 import { GeneratorOptions } from './generator-options.interface';
 import { ControllerInterface } from './controller.interface';
@@ -18,38 +18,40 @@ export class PathGenerator {
     return path.replace(re, '');
   }
 
+  public extractFileNameFromPath(path: string): string {
+    return camelToKebab(camelcase(this.extractNameFromPath(path)));
+  }
+
   public formatPath(path: string): string {
     const re = /\{([^/]+)\}/gi;
     return path.replace(re, ':$1');
   }
 
-  public removeLastSegment(path: string): string {
-    const re = /^(.*)\/\{([^\/]+)\}$/gi;
-    return path.replace(re, '$1');
+  public extractParentPath(path: string): string {
+    const parts = path.substr(1).split('/');
+    return parts.shift();
   }
 
-  public extractLastSegment(path: string): string {
-    const re = /^(.*)\/\{([^\/]+)\}$/gi;
-    const extract = path.replace(re, ':$2');
-    if (extract.startsWith(':')) {
-      return extract;
-    }
-    return null;
+  public extractChildPath(path: string): string {
+    const parts = path.substr(1).split('/');
+    parts.shift();
+    return parts.join('/').replace(/\{([^\/]+)\}/gi, ':$1');
   }
 
   public async testPaths(): Promise<ControllerInterface[]> {
     this.openapi.paths.forEach((pathItem, path) => {
-      const name = this.extractNameFromPath(path);
-      const formalizedPath = this.removeLastSegment(path);
+      const formalizedPath = this.extractParentPath(path);
+      const name = this.extractNameFromPath(formalizedPath);
+      const fileName = this.extractFileNameFromPath(formalizedPath);
       const serviceFile = this.getOrCreateSourceFile(
         this.servicesClasses,
         formalizedPath,
-        `services/${name}.interface`,
+        `services/${fileName}.interface`,
       );
       const controllerFile = this.getOrCreateSourceFile(
         this.controllersClasses,
         formalizedPath,
-        `controllers/${name}.controller`,
+        `controllers/${fileName}.controller`,
       );
       const serviceClassName = `I${capitalize(name)}Service`;
       const serviceFileName = `services/${name}.interface`;
@@ -58,14 +60,7 @@ export class PathGenerator {
         moduleSpecifier: `../${serviceFileName}`,
       });
     });
-    this.openapi.paths.forEach((pathItem, path) => {
-      let formalizedPath = this.removeLastSegment(path);
-      let lastSegment = null;
-      if (this.openapi.paths.has(formalizedPath)) {
-        lastSegment = this.extractLastSegment(path);
-      }
-      this.testPath(formalizedPath, pathItem, lastSegment);
-    });
+    this.openapi.paths.forEach((pathItem, path) => this.testPath(path, pathItem));
     this.controllersClasses.forEach(async sourceFile => await sourceFile.organizeImports().save());
     this.servicesClasses.forEach(async sourceFile => await sourceFile.organizeImports().save());
     const controllerClassNames: ControllerInterface[] = [];
@@ -89,11 +84,18 @@ export class PathGenerator {
     return sourceFile;
   }
 
-  public testPath(path: string, pathItem: PathItem, lastSegment?: string) {
-    const name = this.extractNameFromPath(path);
-    const nestPath = this.formatPath(path);
-    const serviceFile = this.getOrCreateSourceFile(this.servicesClasses, path, `services/${name}.interface`);
-    const controllerFile = this.getOrCreateSourceFile(this.controllersClasses, path, `controllers/${name}.controller`);
+  public testPath(path: string, pathItem: PathItem) {
+    const parentPath = this.extractParentPath(path);
+    const childPath = this.extractChildPath(path);
+    const name = this.extractNameFromPath(parentPath);
+    const fileName = this.extractFileNameFromPath(parentPath);
+    const nestPath = this.formatPath(parentPath);
+    const serviceFile = this.getOrCreateSourceFile(this.servicesClasses, parentPath, `services/${fileName}.interface`);
+    const controllerFile = this.getOrCreateSourceFile(
+      this.controllersClasses,
+      parentPath,
+      `controllers/${fileName}.controller`,
+    );
     controllerFile.addImportDeclaration({
       namedImports: ['Controller', 'Inject'],
       moduleSpecifier: '@nestjs/common',
@@ -139,13 +141,13 @@ export class PathGenerator {
         isExported: true,
       });
     }
-    this.operationGen.testOperation('get', pathItem.get, controllerClass, serviceClass, lastSegment);
-    this.operationGen.testOperation('put', pathItem.put, controllerClass, serviceClass, lastSegment);
-    this.operationGen.testOperation('post', pathItem.post, controllerClass, serviceClass, lastSegment);
-    this.operationGen.testOperation('delete', pathItem.delete, controllerClass, serviceClass, lastSegment);
-    this.operationGen.testOperation('options', pathItem.options, controllerClass, serviceClass, lastSegment);
-    this.operationGen.testOperation('head', pathItem.head, controllerClass, serviceClass, lastSegment);
-    this.operationGen.testOperation('patch', pathItem.patch, controllerClass, serviceClass, lastSegment);
-    this.operationGen.testOperation('trace', pathItem.trace, controllerClass, serviceClass, lastSegment);
+    this.operationGen.testOperation('get', pathItem.get, controllerClass, serviceClass, childPath);
+    this.operationGen.testOperation('put', pathItem.put, controllerClass, serviceClass, childPath);
+    this.operationGen.testOperation('post', pathItem.post, controllerClass, serviceClass, childPath);
+    this.operationGen.testOperation('delete', pathItem.delete, controllerClass, serviceClass, childPath);
+    this.operationGen.testOperation('options', pathItem.options, controllerClass, serviceClass, childPath);
+    this.operationGen.testOperation('head', pathItem.head, controllerClass, serviceClass, childPath);
+    this.operationGen.testOperation('patch', pathItem.patch, controllerClass, serviceClass, childPath);
+    this.operationGen.testOperation('trace', pathItem.trace, controllerClass, serviceClass, childPath);
   }
 }
