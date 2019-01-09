@@ -8,7 +8,6 @@ export class IndexGenerator {
   public async generate() {
     const project = new Project();
     project.addExistingSourceFiles(`${this.options.outputPath}/**/*.ts`);
-    console.log('test', `${this.options.outputPath}/**/*.ts`);
     const exports: ExportDeclarationStructure[] = [];
     project
       .getSourceFiles()
