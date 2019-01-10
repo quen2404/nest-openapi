@@ -6,6 +6,7 @@ import { ParameterGenerator } from './parameter.generator';
 import { RequestBodyGenerator } from './request-body.generator';
 import { ResponseGenerator } from './response.generator';
 import { GeneratorOptions } from './generator-options.interface';
+import { TsDoc } from './tsdoc.class';
 
 export class OperationGenerator {
   constructor(
@@ -49,16 +50,21 @@ export class OperationGenerator {
       isAsync: true,
       returnType: responseType.type,
     });
-    const doc = this.generateDoc(operation);
-    if (doc != null) {
-      methodController.addJsDoc(doc);
-    }
+    const doc = new TsDoc();
+    doc.deprecated = operation.deprecated;
+    doc.summary = operation.summary;
+    doc.description = operation.description;
+
     const methodService = serviceClass.addMethod({
       name: methodName,
       returnType: responseType.type,
     });
     operation.parameters.forEach((parameter: Parameter) => {
       this.parameterGen.testParameter(parameter, methodController, methodService);
+      doc.parameters.push({
+        name: parameter.name,
+        description: parameter.description,
+      });
     });
     this.requestBodyGen.testRequestBody(operation.requestBody, methodController, methodService);
     methodController.setBodyText((write: CodeBlockWriter) => {
@@ -72,22 +78,8 @@ export class OperationGenerator {
         .getName();
       write.write(`return await this.${serviceVariableName}.${methodName}(${parameters});`);
     });
-  }
-
-  generateDoc(operation: Operation): string | null {
-    const result: string[] = [];
-    if (operation.deprecated) {
-      result.push('@deprecated');
+    if (doc.toString().trim().length > 0) {
+      methodController.addJsDoc(doc.toString());
     }
-    if (operation.summary != null) {
-      result.push(operation.summary);
-    }
-    if (operation.description != null && operation.description.trim() !== '') {
-      result.push('', operation.description);
-    }
-    if (result.length == 0) {
-      return null;
-    }
-    return result.join('\n');
   }
 }
