@@ -11,8 +11,9 @@
     "sourceMap": false,
     "outDir": "./dist",
     "rootDir": "./lib",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "plugins": [{ "name": "typescript-tslint-plugin" }]
   },
-  "include": ["lib/**/*"],
+  "include": ["lib/**/*", "generated/**/*"],
   "exclude": ["node_modules", "**/*.(spec|test).ts"]
 }
